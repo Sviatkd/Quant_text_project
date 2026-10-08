@@ -1,0 +1,97 @@
+---
+title: "Untitled"
+format: html
+execute:
+ message: false
+ warning: false
+---
+
+
+```{r}
+library(tesseract)
+library(pdftools)
+library("quanteda.textmodels")
+library(factoextra)
+library(streamR)
+library(tidyverse)
+library(quanteda)
+library(quanteda.corpora)
+library(quanteda.textplots)
+library(quanteda.textstats)
+```
+
+```{r}
+pngkyrgyz = pdftools::pdf_convert("D:\\Нова папка\\pdfs\\74-1.pdf")
+pngCIS2011 = pdftools::pdf_convert("D:\\Нова папка\\pdfs\\Stpetersburg.pdf")
+pngFTA1994 = pdftools::pdf_convert("D:\\Нова папка\\pdfs\\82-1.pdf")
+pngGeorgia = pdftools::pdf_convert("D:\\Нова папка\\pdfs\\121-1.pdf")
+pngArmenia = pdftools::pdf_convert("D:\\Нова папка\\pdfs\\171-1.pdf")
+```
+
+```{r}
+text = ocr(pngCIS2011)
+textk = ocr(pngkyrgyz)
+textFTA1994 = ocr(pngFTA1994)
+textGeorgia = ocr(pngGeorgia)
+textArmenia = ocr(pngArmenia)
+```
+
+```{r}
+vectord = c(CIS2011=text,Kyrgyz=textk,FTA1994=textFTA1994,Georgia=textGeorgia,Armenia=textArmenia)
+data = bind_rows(tibble(document = "CIS2011", text = text),
+tibble(document ="Kyrgyz", text = textk),
+tibble(document = "FTA1994", text = textFTA1994),
+tibble(document = "Georgia", text = textGeorgia),
+tibble(document = "Armenia", text = textArmenia))
+data_combined <- data %>%
+  group_by(document) %>%
+  summarise(text = paste(text, collapse = "\n"))
+Agreement_corpus1 = corpus(data_combined,text_field = "text", docid_field = "document")
+Agreement_tokens = tokens(vectord,remove_punct=TRUE,remove_symbols = TRUE, remove_numbers = TRUE)
+```
+```{r}
+tokk =  tokens(textk,remove_punct=TRUE,remove_symbols = TRUE, remove_numbers = TRUE)
+docfeat_matk=dfm(tokk)
+trimdocfeat = dfm_trim(docfeat_matk,min_docfreq = 3)
+topfeatures(docfeat_matk)
+toks_stopk = tokens_remove(tokk,c(stopwords::stopwords("english"),"the","of",",","and","‘","contracting","shall","parties","or",".",":","-",";","ofthe",")","party","treaty","commission","experts","customs",",","accordance","dispute","paragraph","provisions","goods","agreement","origin","measures","re-export","country","sides","article","damage","restrictions"))
+twdfmk <- dfm(toks_stopk)
+
+```
+
+
+```{r}
+textk = Agreement_corpus1
+tok =  tokens(textk,remove_punct=TRUE,remove_symbols = TRUE, remove_numbers = TRUE)
+docfeat_mat=dfm(tok)
+trimdocfeat = dfm_trim(docfeat_mat,min_docfreq = 3)
+topfeatures(docfeat_mat)
+toks_stop = tokens_remove(tok,c(stopwords::stopwords("english"),"the","of",",","and","‘","contracting","shall","parties","or",".",":","-",";","ofthe",")","party","treaty","commission","experts","customs",",","accordance","dispute","paragraph","provisions"))
+twdfm <- dfm(toks_stop)
+```
+
+
+```{r}
+set.seed(123)
+twdfm = twdfm %>% dfm_tfidf()
+fviz_nbclust(x=as.matrix(t(twdfm)),FUNcluster = kmeans,method = "wss")
+clmod=kmeans(t(twdfm),centers = 4)
+quanteda.textplots::textplot_wordcloud(twdfm)
+pcamod1 = princomp(t(twdfm))
+pcamod = prcomp(twdfm)
+fviz_pca_biplot(pcamod)
+fviz_pca_biplot(pcamod1)
+```
+
+
+```{r}
+set.seed(123)
+twdfmk = twdfmk %>% dfm_tfidf()
+fviz_nbclust(x=as.matrix(t(twdfmk)),FUNcluster = kmeans,method = "wss")
+clmod=kmeans(t(twdfmk),centers = 8)
+quanteda.textplots::textplot_wordcloud(twdfmk)
+pcamod1k = princomp(t(twdfmk))
+pcamodk = prcomp(twdfmk)
+fviz_pca_biplot(pcamodk)
+fviz_pca_biplot(pcamod1k)
+```
