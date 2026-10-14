@@ -70,6 +70,13 @@ toks_stop = tokens_remove(tok,c(stopwords::stopwords("english"),"the","of",",","
 twdfm <- dfm(toks_stop)
 ```
 
+```{r}
+
+textstat_keyness(twdfm,target="Kyrgyz",measure = "pmi") |> textplot_keyness() 
+textstat_keyness(twdfm,target="CIS2011",measure = "pmi") |> textplot_keyness() 
+textstat_keyness(twdfm,target="FTA1994",measure = "pmi") |> textplot_keyness()
+textstat_keyness(twdfm,target="Georgia",measure = "pmi") |> textplot_keyness()
+```
 
 ```{r}
 set.seed(123)
