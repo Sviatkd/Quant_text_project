@@ -1,0 +1,73 @@
+---
+title: "Untitled"
+format: html
+execute:
+ message: false
+ warning: false
+---
+
+
+```{r}
+library(tesseract)
+library(pdftools)
+library("quanteda.textmodels")
+library(factoextra)
+library(streamR)
+library(tidyverse)
+library(quanteda)
+library(quanteda.corpora)
+library(quanteda.textplots)
+library(quanteda.textstats)
+```
+```{r}
+pdfkyrgyz = pdftools::pdf_text("D:\\Нова папка\\pdfs\\74-1.pdf")
+pdfCIS2011 = pdftools::pdf_text("D:\\Нова папка\\pdfs\\Stpetersburg.pdf")
+pdfFTA1994 = pdftools::pdf_text("D:\\Нова папка\\pdfs\\82-1.pdf")
+pdfGeorgia = pdftools::pdf_text("D:\\Нова папка\\pdfs\\121-1.pdf")
+pdfArmenia = pdftools::pdf_text("D:\\Нова папка\\pdfs\\171-1.pdf")
+pdfMontenegro = pdftools::pdf_text("D:\\Нова папка\\pdfs\\MUFTA Eng  17 11 2011.pdf")
+pdfMacedonia = pdftools::pdf_text("D:\\Нова папка\\pdfs\\Ukraine-FYROM-Agreement.pdf")
+pdfEU = pdftools::pdf_text("D:\\Нова папка\\pdfs\\OJ_L_2014_161_FULL_EN_TXT.pdf")
+pdfIsrael = pdftools::pdf_text("D:\\Нова папка\\pdfs\\sahar-hutz_agreements_israel-ukraine-fta-en.pdf")
+pdfUAE = pdftools::pdf_text("D:\\Нова папка\\pdfs\\UAE-Ukraine CEPA_Eng_Fully Executed 1.pdf")
+pdfCanada = pdftools::pdf_text("D:\\Нова папка\\pdfs\\CanadaEng.pdf")
+pdfMoldova = pdftools::pdf_text("D:\\Нова папка\\pdfs\\FTA Ukraine - Moldova_ToA.pdf")
+pdfMoldova    <- pdf_text("D:\\Нова папка\\pdfs\\FTA Ukraine - Moldova_ToA.pdf")
+pdfAzerbaijan <- pdf_text("D:\\Нова папка\\pdfs\\FTA Ukraine - Azerbaijan_ToA.pdf")
+pdfBelarus    <- pdf_text("D:\\Нова папка\\pdfs\\FTA Ukraine - Belarus_ToA.pdf")
+pdfKazakh     <- pdf_text("D:\\Нова папка\\pdfs\\FTA Ukraine - Kazakhstan_ToA.pdf")
+pdfTajik      <- pdf_text("D:\\Нова папка\\pdfs\\FTA Ukraine - Tajikistan_ToA.pdf")
+pdfUzbek      <- pdf_text("D:\\Нова папка\\pdfs\\FTA Ukraine - Uzbekistan_ToA.pdf")
+pdfUK = pdf_text("D:\\Нова папка\\pdfs\\CS_Ukraine_1.2020_UK_Ukraine_Political_Free_Trade_Strat_Partner_Agreement.pdf")
+```
+
+```{r}
+library(dplyr)
+library(tibble)
+
+# Combine them into a single tidy tibble corpus
+fta_corpus <- tibble(
+  agreement = c("Kyrgyzstan", "CIS_2011", "FTA_1994", "Georgia", "Armenia", 
+                "Montenegro", "Macedonia", "EU", "Israel", "UAE", "Canada", 
+                "Moldova", "Azerbaijan", "Belarus", "Kazakhstan", "Tajikistan", 
+                "Uzbekistan", "UK"),
+  text = list(pdfkyrgyz, pdfCIS2011, pdfFTA1994, pdfGeorgia, pdfArmenia, 
+              pdfMontenegro, pdfMacedonia, pdfEU, pdfIsrael, pdfUAE, pdfCanada, 
+              pdfMoldova, pdfAzerbaijan, pdfBelarus, pdfKazakh, pdfTajik, 
+              pdfUzbek, pdfUK)
+)
+```
+```{r}
+library(quanteda)
+library(dplyr)
+
+# Collapse each PDF's vector of pages into a single character string per agreement
+fta_corpus_flat <- fta_corpus %>%
+  mutate(text = sapply(text, paste, collapse = "\n"))
+
+# Now create the corpus safely
+my_corpus <- corpus(fta_corpus_flat, text_field = "text")
+
+# Check it
+summary(my_corpus)
+```
