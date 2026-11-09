@@ -1,0 +1,2285 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.11.9">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Untitled</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="model_files/libs/clipboard/clipboard.min.js"></script>
+<script src="model_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="model_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="model_files/libs/quarto-html/scrollable-regions/scrollable-regions.js" type="module"></script>
+<script src="model_files/libs/quarto-html/popper.min.js"></script>
+<script src="model_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="model_files/libs/quarto-html/anchor.min.js"></script>
+<link href="model_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="model_files/libs/quarto-html/quarto-syntax-highlighting-63b5708e65d6cd79cd7618c58d0c21e7.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="model_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="model_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="model_files/libs/bootstrap/bootstrap-943e08653f4bd8ac7ab9292bfc489267.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light"><a id="quarto-skip-link" class="visually-hidden-focusable" href="#quarto-document-content">Skip to main content</a>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content" tabindex="-1">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Untitled</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tesseract)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pdftools)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"quanteda.textmodels"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(factoextra)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(streamR)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda.corpora)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda.textplots)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda.textstats)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda.textmodels)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(skmeans)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>pdfkyrgyz <span class="ot">=</span> pdftools<span class="sc">::</span><span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">74-1.pdf"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>pdfCIS2011 <span class="ot">=</span> pdftools<span class="sc">::</span><span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">Stpetersburg.pdf"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>pdfFTA1994 <span class="ot">=</span> pdftools<span class="sc">::</span><span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">82-1.pdf"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>pdfGeorgia <span class="ot">=</span> pdftools<span class="sc">::</span><span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">121-1.pdf"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>pdfArmenia <span class="ot">=</span> pdftools<span class="sc">::</span><span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">171-1.pdf"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>pdfMontenegro <span class="ot">=</span> pdftools<span class="sc">::</span><span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">MUFTA Eng  17 11 2011.pdf"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>pdfMacedonia <span class="ot">=</span> pdftools<span class="sc">::</span><span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">Ukraine-FYROM-Agreement.pdf"</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>pdfEU <span class="ot">=</span> pdftools<span class="sc">::</span><span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">OJ_L_2014_161_FULL_EN_TXT.pdf"</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>pdfIsrael <span class="ot">=</span> pdftools<span class="sc">::</span><span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">sahar-hutz_agreements_israel-ukraine-fta-en.pdf"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>pdfCanada <span class="ot">=</span> pdftools<span class="sc">::</span><span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">CanadaEng.pdf"</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>pdfMoldova <span class="ot">=</span> pdftools<span class="sc">::</span><span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">FTA Ukraine - Moldova_ToA.pdf"</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>pdfMoldova    <span class="ot">&lt;-</span> <span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">FTA Ukraine - Moldova_ToA.pdf"</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>pdfAzerbaijan <span class="ot">&lt;-</span> <span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">FTA Ukraine - Azerbaijan_ToA.pdf"</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>pdfBelarus    <span class="ot">&lt;-</span> <span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">FTA Ukraine - Belarus_ToA.pdf"</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>pdfKazakh     <span class="ot">&lt;-</span> <span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">FTA Ukraine - Kazakhstan_ToA.pdf"</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>pdfTajik      <span class="ot">&lt;-</span> <span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">FTA Ukraine - Tajikistan_ToA.pdf"</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>pdfUzbek      <span class="ot">&lt;-</span> <span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">FTA Ukraine - Uzbekistan_ToA.pdf"</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>pdfUK <span class="ot">=</span> <span class="fu">pdf_text</span>(<span class="st">"D:</span><span class="sc">\\</span><span class="st">Нова папка</span><span class="sc">\\</span><span class="st">pdfs</span><span class="sc">\\</span><span class="st">CS_Ukraine_1.2020_UK_Ukraine_Political_Free_Trade_Strat_Partner_Agreement.pdf"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine them into a single tidy tibble corpus</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>fta_corpus <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">agreement =</span> <span class="fu">c</span>(<span class="st">"Kyrgyzstan"</span>, <span class="st">"CIS_2011"</span>, <span class="st">"FTA_1994"</span>, <span class="st">"Georgia"</span>, <span class="st">"Armenia"</span>, </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Montenegro"</span>, <span class="st">"Macedonia"</span>, <span class="st">"EU"</span>, <span class="st">"Israel"</span>, <span class="st">"Canada"</span>, </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Moldova"</span>, <span class="st">"Azerbaijan"</span>, <span class="st">"Belarus"</span>, <span class="st">"Kazakhstan"</span>, <span class="st">"Tajikistan"</span>, </span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Uzbekistan"</span>, <span class="st">"UK"</span>),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">text =</span> <span class="fu">list</span>(pdfkyrgyz, pdfCIS2011, pdfFTA1994, pdfGeorgia, pdfArmenia, </span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>              pdfMontenegro, pdfMacedonia, pdfEU, pdfIsrael, pdfCanada, </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>              pdfMoldova, pdfAzerbaijan, pdfBelarus, pdfKazakh, pdfTajik, </span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>              pdfUzbek, pdfUK)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Collapse each PDF's vector of pages into a single character string per agreement</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>fta_corpus_flat <span class="ot">&lt;-</span> fta_corpus <span class="sc">%&gt;%</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">text =</span> <span class="fu">sapply</span>(text, paste, <span class="at">collapse =</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Now create the corpus safely</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>my_corpus <span class="ot">&lt;-</span> <span class="fu">corpus</span>(fta_corpus_flat, <span class="at">text_field =</span> <span class="st">"text"</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Check it</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(my_corpus)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Corpus consisting of 17 documents, showing 17 documents:
+
+   Text Types Tokens Sentences  agreement
+  text1   548   1761        84 Kyrgyzstan
+  text2  2555  18589       608   CIS_2011
+  text3  1527  11755       564   FTA_1994
+  text4   512   1769        91    Georgia
+  text5   540   1515        77    Armenia
+  text6  1356   8978       486 Montenegro
+  text7  4693  45438      1137  Macedonia
+  text8 31651 751209     50889         EU
+  text9  3273  32561      1601     Israel
+ text10  9297 152343      9111     Canada
+ text11   800   3691       131    Moldova
+ text12   531   1757        49 Azerbaijan
+ text13   675   3929       155    Belarus
+ text14   633   2502        71 Kazakhstan
+ text15   579   2055        55 Tajikistan
+ text16   622   2352        73 Uzbekistan
+ text17 10096 167543      7660         UK</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">docnames</span>(my_corpus) <span class="ot">&lt;-</span> my_corpus<span class="sc">$</span>agreement</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a> textk <span class="ot">=</span> my_corpus</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>tokk <span class="ot">=</span>  <span class="fu">tokens</span>(textk,<span class="at">remove_punct=</span><span class="cn">TRUE</span>,<span class="at">remove_symbols =</span> <span class="cn">TRUE</span>, <span class="at">remove_numbers =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>toks_stopk <span class="ot">=</span> <span class="fu">tokens_remove</span>(tokk,<span class="fu">c</span>(stopwords<span class="sc">::</span><span class="fu">stopwords</span>(<span class="st">"english"</span>),<span class="st">"the"</span>,<span class="st">"of"</span>,<span class="st">","</span>,<span class="st">"and"</span>,<span class="st">"‘"</span>,<span class="st">"contracting"</span>,<span class="st">"shall"</span>,<span class="st">"parties"</span>,<span class="st">"or"</span>,<span class="st">"."</span>,<span class="st">":"</span>,<span class="st">"-"</span>,<span class="st">";"</span>,<span class="st">"ofthe"</span>,<span class="st">")"</span>,<span class="st">"party"</span>,<span class="st">"treaty"</span>,<span class="st">","</span>,<span class="st">"accordance"</span>,<span class="st">"paragraph"</span>,<span class="st">"provisions"</span>,<span class="st">"agreement"</span>,<span class="st">"country"</span>,<span class="st">"sides"</span>,<span class="st">"article"</span>,<span class="st">"chapter"</span>,<span class="st">"Annex"</span>,<span class="st">"appendix"</span>,<span class="st">"party"</span>,<span class="st">"Appendix"</span>,<span class="st">"shall"</span>)) </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>twdfmk <span class="ot">&lt;-</span> <span class="fu">dfm</span>(toks_stopk) <span class="sc">|&gt;</span> <span class="fu">dfm_trim</span>(<span class="at">min_docfreq =</span> <span class="dv">3</span>) </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>western <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>clusthier <span class="ot">=</span> twdfmk <span class="sc">|&gt;</span> <span class="fu">dist</span>(<span class="at">method =</span> <span class="st">"canberra"</span>) <span class="sc">|&gt;</span>  <span class="fu">hclust</span>()</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(clusthier)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>clmod<span class="ot">=</span><span class="fu">skmeans</span>(<span class="fu">as.matrix</span>(twdfmk),<span class="at">k =</span> <span class="dv">4</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>clred <span class="ot">=</span> <span class="fu">t</span>(<span class="fu">as.data.frame</span>(clmod<span class="sc">$</span>prototypes))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>clmod<span class="sc">$</span>cluster</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Kyrgyzstan   CIS_2011   FTA_1994    Georgia    Armenia Montenegro  Macedonia 
+         2          2          2          2          2          3          1 
+        EU     Israel     Canada    Moldova Azerbaijan    Belarus Kazakhstan 
+         1          3          3          4          4          4          4 
+Tajikistan Uzbekistan         UK 
+         4          4          3 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>forestngram <span class="ot">=</span> <span class="fu">randomForest</span>(<span class="at">x=</span><span class="fu">as.matrix</span>(twdfmk),<span class="at">y=</span><span class="fu">factor</span>(western),<span class="at">ntree=</span><span class="dv">1000</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>nbngram <span class="ot">=</span> <span class="fu">textmodel_nb</span>(twdfmk,western)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>svmngram <span class="ot">=</span> <span class="fu">textmodel_svmlin</span>(twdfmk,western)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda.textmodels)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># LLM generated LOOCV code # </span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Total number of documents</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(twdfmk)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure the target variable is a factor</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">factor</span>(western)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Vectors to store the predicted classes for each model</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>pred_rf  <span class="ot">&lt;-</span> <span class="fu">character</span>(n)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>pred_nb  <span class="ot">&lt;-</span> <span class="fu">character</span>(n)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>pred_svm <span class="ot">&lt;-</span> <span class="fu">character</span>(n)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Start LOOCV loop</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Running LOOCV loop across"</span>, n, <span class="st">"documents...</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running LOOCV loop across 17 documents...</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n) {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Training indices (all except i) and testing index (just i)</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  train_idx <span class="ot">&lt;-</span> <span class="sc">-</span>i</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  test_idx <span class="ot">&lt;-</span> i</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 1. Random Forest</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># randomForest expects a standard matrix/data.frame; drop=FALSE keeps it 2D</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  rf_model <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">as.matrix</span>(twdfmk[train_idx, ]), </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> y[train_idx], </span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">ntree =</span> <span class="dv">1000</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  pred_rf[i] <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="fu">predict</span>(rf_model, <span class="at">newdata =</span> <span class="fu">as.matrix</span>(twdfmk[test_idx, , <span class="at">drop =</span> <span class="cn">FALSE</span>])))</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 2. Naive Bayes (quanteda.textmodels)</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  nb_model <span class="ot">&lt;-</span> <span class="fu">textmodel_nb</span>(twdfmk[train_idx, ], y[train_idx])</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  pred_nb[i] <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="fu">predict</span>(nb_model, <span class="at">newdata =</span> twdfmk[test_idx, ], <span class="at">type =</span> <span class="st">"class"</span>))</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 3. Linear SVM (quanteda.textmodels)</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  svm_model <span class="ot">&lt;-</span> <span class="fu">textmodel_svmlin</span>(twdfmk[train_idx, ], y[train_idx])</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  pred_svm[i] <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="fu">predict</span>(svm_model, <span class="at">newdata =</span> twdfmk[test_idx, ]))</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Evaluation (Accuracy) ---</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>actual <span class="ot">&lt;-</span> <span class="fu">as.character</span>(y)</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>acc_rf  <span class="ot">&lt;-</span> <span class="fu">mean</span>(pred_rf <span class="sc">==</span> actual)</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>acc_nb  <span class="ot">&lt;-</span> <span class="fu">mean</span>(pred_nb <span class="sc">==</span> actual)</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>acc_svm <span class="ot">&lt;-</span> <span class="fu">mean</span>(pred_svm <span class="sc">==</span> actual)</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">--- LOOCV Accuracies ---</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+--- LOOCV Accuracies ---</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Random Forest: %.2f%%</span><span class="sc">\n</span><span class="st">"</span>, acc_rf <span class="sc">*</span> <span class="dv">100</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Random Forest: 88.24%</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Naive Bayes:   %.2f%%</span><span class="sc">\n</span><span class="st">"</span>, acc_nb <span class="sc">*</span> <span class="dv">100</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Naive Bayes:   94.12%</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Linear SVM:    %.2f%%</span><span class="sc">\n</span><span class="st">"</span>, acc_svm <span class="sc">*</span> <span class="dv">100</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear SVM:    64.71%</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>toks_stopk <span class="ot">=</span> <span class="fu">tokens_remove</span>(tokk,<span class="fu">c</span>(stopwords<span class="sc">::</span><span class="fu">stopwords</span>(<span class="st">"english"</span>),<span class="st">"the"</span>,<span class="st">"of"</span>,<span class="st">","</span>,<span class="st">"and"</span>,<span class="st">"‘"</span>,<span class="st">"contracting"</span>,<span class="st">"shall"</span>,<span class="st">"parties"</span>,<span class="st">"or"</span>,<span class="st">"."</span>,<span class="st">":"</span>,<span class="st">"-"</span>,<span class="st">";"</span>,<span class="st">"ofthe"</span>,<span class="st">")"</span>,<span class="st">"party"</span>,<span class="st">"treaty"</span>,<span class="st">","</span>,<span class="st">"accordance"</span>,<span class="st">"paragraph"</span>,<span class="st">"provisions"</span>,<span class="st">"agreement"</span>,<span class="st">"country"</span>,<span class="st">"sides"</span>,<span class="st">"article"</span>,<span class="st">"chapter"</span>,<span class="st">"Annex"</span>,<span class="st">"appendix"</span>,<span class="st">"party"</span>,<span class="st">"Appendix"</span>,<span class="st">"shall"</span>)) <span class="sc">|&gt;</span> <span class="fu">tokens_ngrams</span>(<span class="at">n=</span><span class="dv">2</span>L)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>twdfmk <span class="ot">&lt;-</span> <span class="fu">dfm</span>(toks_stopk) <span class="sc">|&gt;</span> <span class="fu">dfm_trim</span>(<span class="at">min_docfreq =</span> <span class="dv">3</span>) </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>western <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>clusthier <span class="ot">=</span> twdfmk <span class="sc">|&gt;</span> <span class="fu">dist</span>(<span class="at">method =</span> <span class="st">"canberra"</span>) <span class="sc">|&gt;</span>  <span class="fu">hclust</span>()</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(clusthier)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>clmod<span class="ot">=</span><span class="fu">skmeans</span>(<span class="fu">as.matrix</span>(twdfmk),<span class="at">k =</span> <span class="dv">4</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>clred <span class="ot">=</span> <span class="fu">t</span>(<span class="fu">as.data.frame</span>(clmod<span class="sc">$</span>prototypes))</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>clmod<span class="sc">$</span>cluster</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Kyrgyzstan   CIS_2011   FTA_1994    Georgia    Armenia Montenegro  Macedonia 
+         2          3          3          2          2          1          3 
+        EU     Israel     Canada    Moldova Azerbaijan    Belarus Kazakhstan 
+         4          1          1          1          2          2          2 
+Tajikistan Uzbekistan         UK 
+         2          2          4 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>forestngram <span class="ot">=</span> <span class="fu">randomForest</span>(<span class="at">x=</span><span class="fu">as.matrix</span>(twdfmk),<span class="at">y=</span><span class="fu">factor</span>(western),<span class="at">ntree=</span><span class="dv">1000</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>nbngram <span class="ot">=</span> <span class="fu">textmodel_nb</span>(twdfmk,western)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>svmngram <span class="ot">=</span> <span class="fu">textmodel_svmlin</span>(twdfmk,western)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda.textmodels)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># LLM generated LOOCV code # </span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Total number of documents</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(twdfmk)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure the target variable is a factor</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">factor</span>(western)</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Vectors to store the predicted classes for each model</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>pred_rf  <span class="ot">&lt;-</span> <span class="fu">character</span>(n)</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>pred_nb  <span class="ot">&lt;-</span> <span class="fu">character</span>(n)</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>pred_svm <span class="ot">&lt;-</span> <span class="fu">character</span>(n)</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Start LOOCV loop</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Running LOOCV loop across"</span>, n, <span class="st">"documents...</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running LOOCV loop across 17 documents...</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n) {</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Training indices (all except i) and testing index (just i)</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  train_idx <span class="ot">&lt;-</span> <span class="sc">-</span>i</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  test_idx <span class="ot">&lt;-</span> i</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 1. Random Forest</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># randomForest expects a standard matrix/data.frame; drop=FALSE keeps it 2D</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  rf_model <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">as.matrix</span>(twdfmk[train_idx, ]), </span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> y[train_idx], </span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">ntree =</span> <span class="dv">1000</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>  pred_rf[i] <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="fu">predict</span>(rf_model, <span class="at">newdata =</span> <span class="fu">as.matrix</span>(twdfmk[test_idx, , <span class="at">drop =</span> <span class="cn">FALSE</span>])))</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 2. Naive Bayes (quanteda.textmodels)</span></span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>  nb_model <span class="ot">&lt;-</span> <span class="fu">textmodel_nb</span>(twdfmk[train_idx, ], y[train_idx])</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>  pred_nb[i] <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="fu">predict</span>(nb_model, <span class="at">newdata =</span> twdfmk[test_idx, ], <span class="at">type =</span> <span class="st">"class"</span>))</span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 3. Linear SVM (quanteda.textmodels)</span></span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>  svm_model <span class="ot">&lt;-</span> <span class="fu">textmodel_svmlin</span>(twdfmk[train_idx, ], y[train_idx])</span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>  pred_svm[i] <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="fu">predict</span>(svm_model, <span class="at">newdata =</span> twdfmk[test_idx, ]))</span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Evaluation (Accuracy) ---</span></span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>actual <span class="ot">&lt;-</span> <span class="fu">as.character</span>(y)</span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a>acc_rf  <span class="ot">&lt;-</span> <span class="fu">mean</span>(pred_rf <span class="sc">==</span> actual)</span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a>acc_nb  <span class="ot">&lt;-</span> <span class="fu">mean</span>(pred_nb <span class="sc">==</span> actual)</span>
+<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a>acc_svm <span class="ot">&lt;-</span> <span class="fu">mean</span>(pred_svm <span class="sc">==</span> actual)</span>
+<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">--- LOOCV Accuracies ---</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+--- LOOCV Accuracies ---</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Random Forest: %.2f%%</span><span class="sc">\n</span><span class="st">"</span>, acc_rf <span class="sc">*</span> <span class="dv">100</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Random Forest: 82.35%</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Naive Bayes:   %.2f%%</span><span class="sc">\n</span><span class="st">"</span>, acc_nb <span class="sc">*</span> <span class="dv">100</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Naive Bayes:   100.00%</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Linear SVM:    %.2f%%</span><span class="sc">\n</span><span class="st">"</span>, acc_svm <span class="sc">*</span> <span class="dv">100</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear SVM:    70.59%</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>toks_stopk <span class="ot">=</span> <span class="fu">tokens_remove</span>(tokk,<span class="fu">c</span>(stopwords<span class="sc">::</span><span class="fu">stopwords</span>(<span class="st">"english"</span>),<span class="st">"the"</span>,<span class="st">"of"</span>,<span class="st">","</span>,<span class="st">"and"</span>,<span class="st">"‘"</span>,<span class="st">"contracting"</span>,<span class="st">"shall"</span>,<span class="st">"parties"</span>,<span class="st">"or"</span>,<span class="st">"."</span>,<span class="st">":"</span>,<span class="st">"-"</span>,<span class="st">";"</span>,<span class="st">"ofthe"</span>,<span class="st">")"</span>,<span class="st">"party"</span>,<span class="st">"treaty"</span>,<span class="st">","</span>,<span class="st">"accordance"</span>,<span class="st">"paragraph"</span>,<span class="st">"provisions"</span>,<span class="st">"agreement"</span>,<span class="st">"country"</span>,<span class="st">"sides"</span>,<span class="st">"article"</span>,<span class="st">"chapter"</span>,<span class="st">"Annex"</span>,<span class="st">"appendix"</span>,<span class="st">"party"</span>,<span class="st">"Appendix"</span>,<span class="st">"shall"</span>)) <span class="sc">|&gt;</span> <span class="fu">tokens_ngrams</span>(<span class="at">n=</span><span class="dv">3</span>L)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>twdfmk <span class="ot">&lt;-</span> <span class="fu">dfm</span>(toks_stopk) <span class="sc">|&gt;</span> <span class="fu">dfm_trim</span>(<span class="at">min_docfreq =</span> <span class="dv">3</span>) </span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>western <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>clusthier <span class="ot">=</span> twdfmk <span class="sc">|&gt;</span> <span class="fu">dist</span>(<span class="at">method =</span> <span class="st">"canberra"</span>) <span class="sc">|&gt;</span>  <span class="fu">hclust</span>()</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(clusthier)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>clmod<span class="ot">=</span><span class="fu">skmeans</span>(<span class="fu">as.matrix</span>(twdfmk),<span class="at">k =</span> <span class="dv">4</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>clred <span class="ot">=</span> <span class="fu">t</span>(<span class="fu">as.data.frame</span>(clmod<span class="sc">$</span>prototypes))</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>clmod<span class="sc">$</span>cluster</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Kyrgyzstan   CIS_2011   FTA_1994    Georgia    Armenia Montenegro  Macedonia 
+         3          1          3          2          3          1          1 
+        EU     Israel     Canada    Moldova Azerbaijan    Belarus Kazakhstan 
+         4          1          1          2          2          2          2 
+Tajikistan Uzbekistan         UK 
+         2          2          4 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>forestngram <span class="ot">=</span> <span class="fu">randomForest</span>(<span class="at">x=</span><span class="fu">as.matrix</span>(twdfmk),<span class="at">y=</span><span class="fu">factor</span>(western),<span class="at">ntree=</span><span class="dv">1000</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>nbngram <span class="ot">=</span> <span class="fu">textmodel_nb</span>(twdfmk,western)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>svmngram <span class="ot">=</span> <span class="fu">textmodel_svmlin</span>(twdfmk,western)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(quanteda.textmodels)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="co"># LLM generated LOOCV code # </span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Total number of documents</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(twdfmk)</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure the target variable is a factor</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">factor</span>(western)</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Vectors to store the predicted classes for each model</span></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>pred_rf  <span class="ot">&lt;-</span> <span class="fu">character</span>(n)</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>pred_nb  <span class="ot">&lt;-</span> <span class="fu">character</span>(n)</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>pred_svm <span class="ot">&lt;-</span> <span class="fu">character</span>(n)</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Start LOOCV loop</span></span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Running LOOCV loop across"</span>, n, <span class="st">"documents...</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running LOOCV loop across 17 documents...</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n) {</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Training indices (all except i) and testing index (just i)</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  train_idx <span class="ot">&lt;-</span> <span class="sc">-</span>i</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  test_idx <span class="ot">&lt;-</span> i</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 1. Random Forest</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># randomForest expects a standard matrix/data.frame; drop=FALSE keeps it 2D</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  rf_model <span class="ot">&lt;-</span> <span class="fu">randomForest</span>(</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">as.matrix</span>(twdfmk[train_idx, ]), </span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> y[train_idx], </span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">ntree =</span> <span class="dv">1000</span></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>  pred_rf[i] <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="fu">predict</span>(rf_model, <span class="at">newdata =</span> <span class="fu">as.matrix</span>(twdfmk[test_idx, , <span class="at">drop =</span> <span class="cn">FALSE</span>])))</span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 2. Naive Bayes (quanteda.textmodels)</span></span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>  nb_model <span class="ot">&lt;-</span> <span class="fu">textmodel_nb</span>(twdfmk[train_idx, ], y[train_idx])</span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>  pred_nb[i] <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="fu">predict</span>(nb_model, <span class="at">newdata =</span> twdfmk[test_idx, ], <span class="at">type =</span> <span class="st">"class"</span>))</span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 3. Linear SVM (quanteda.textmodels)</span></span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>  svm_model <span class="ot">&lt;-</span> <span class="fu">textmodel_svmlin</span>(twdfmk[train_idx, ], y[train_idx])</span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a>  pred_svm[i] <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="fu">predict</span>(svm_model, <span class="at">newdata =</span> twdfmk[test_idx, ]))</span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-24"><a href="#cb43-24" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Evaluation (Accuracy) ---</span></span>
+<span id="cb43-25"><a href="#cb43-25" aria-hidden="true" tabindex="-1"></a>actual <span class="ot">&lt;-</span> <span class="fu">as.character</span>(y)</span>
+<span id="cb43-26"><a href="#cb43-26" aria-hidden="true" tabindex="-1"></a>acc_rf  <span class="ot">&lt;-</span> <span class="fu">mean</span>(pred_rf <span class="sc">==</span> actual)</span>
+<span id="cb43-27"><a href="#cb43-27" aria-hidden="true" tabindex="-1"></a>acc_nb  <span class="ot">&lt;-</span> <span class="fu">mean</span>(pred_nb <span class="sc">==</span> actual)</span>
+<span id="cb43-28"><a href="#cb43-28" aria-hidden="true" tabindex="-1"></a>acc_svm <span class="ot">&lt;-</span> <span class="fu">mean</span>(pred_svm <span class="sc">==</span> actual)</span>
+<span id="cb43-29"><a href="#cb43-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-30"><a href="#cb43-30" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">--- LOOCV Accuracies ---</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+--- LOOCV Accuracies ---</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Random Forest: %.2f%%</span><span class="sc">\n</span><span class="st">"</span>, acc_rf <span class="sc">*</span> <span class="dv">100</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Random Forest: 76.47%</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Naive Bayes:   %.2f%%</span><span class="sc">\n</span><span class="st">"</span>, acc_nb <span class="sc">*</span> <span class="dv">100</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Naive Bayes:   94.12%</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">"Linear SVM:    %.2f%%</span><span class="sc">\n</span><span class="st">"</span>, acc_svm <span class="sc">*</span> <span class="dv">100</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear SVM:    70.59%</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">varImpPlot</span>(forestngram)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>nbresults <span class="ot">=</span> <span class="fu">as.data.frame</span>(<span class="fu">t</span>(nbngram<span class="sc">$</span>param))</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>nbresults<span class="sc">$</span>relative_loglikelihood1 <span class="ot">=</span> <span class="fu">log</span>(nbresults<span class="sc">$</span><span class="st">`</span><span class="at">1</span><span class="st">`</span><span class="sc">/</span>nbresults<span class="sc">$</span><span class="st">`</span><span class="at">0</span><span class="st">`</span>)</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>most_indicative_of_west <span class="ot">=</span> <span class="fu">filter</span>(nbresults,relative_loglikelihood1<span class="sc">&gt;=</span><span class="dv">2</span>)</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>least_indicative_of_west <span class="ot">=</span> <span class="fu">filter</span>(nbresults,relative_loglikelihood1 <span class="sc">&lt;=</span> <span class="sc">-</span><span class="dv">2</span>)</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(most_indicative_of_west)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                            0            1
+thickness_exceeding_mm           0.0004940711 0.0037993921
+containing_added_sugar           0.0002470356 0.0066076384
+added_sugar_sweetening           0.0002470356 0.0027091318
+sugar_sweetening_matter          0.0002470356 0.0027091318
+containing_weight_less           0.0002470356 0.0043280032
+value_materials_used             0.0002470356 0.0054843399
+upon_entry_force                 0.0001235178 0.0010241840
+incorporated_made_part           0.0001235178 0.0013876041
+air_transport_services           0.0001235178 0.0014206423
+reasonable_period_time           0.0001235178 0.0014206423
+without_undue_delay              0.0001235178 0.0009911458
+years_entry_force                0.0001235178 0.0116955200
+establishment_arbitration_panel  0.0001235178 0.0013215277
+arbitration_panel_may            0.0001235178 0.0011893749
+industrial_uses_manufacture      0.0001235178 0.0009911458
+elsewhere_specified_included     0.0001235178 0.0046583851
+provided_total_value             0.0001235178 0.0016188714
+total_value_exceed               0.0001235178 0.0016188714
+fats_oils_fractions              0.0001235178 0.0011232985
+whether_refined_chemically       0.0001235178 0.0009250694
+refined_chemically_modified      0.0001235178 0.0009581076
+foodstuffs_human_consumption     0.0001235178 0.0022135589
+containing_less_weight           0.0001235178 0.0033368574
+meat_meat_offal                  0.0001235178 0.0011563367
+extracts_essences_concentrates   0.0001235178 0.0011563367
+unfit_human_consumption          0.0001235178 0.0009250694
+rectangular_including_square     0.0001235178 0.0014206423
+materials_heading_exceed         0.0001235178 0.0018171006
+plates_sheets_strip              0.0001235178 0.0015197568
+impregnated_coated_covered       0.0001235178 0.0014867186
+rate_staging_category            0.0001235178 0.0492599445
+contained_1a_wto                 0.0001235178 0.0010241840
+conformity_assessment_procedures 0.0001235178 0.0012224131
+plants_plant_products            0.0001235178 0.0013876041
+animals_animal_products          0.0001235178 0.0009250694
+cross-border_supply_services     0.0001235178 0.0009250694
+economic_needs_test              0.0001235178 0.0021144443
+adopt_maintain_measure           0.0001235178 0.0009250694
+made_available_public            0.0001235178 0.0013876041
+financial_service_suppliers      0.0001235178 0.0009911458
+international_maritime_transport 0.0001235178 0.0010572221
+intellectual_property_right      0.0001235178 0.0014867186
+natural_legal_persons            0.0001235178 0.0010572221
+mutually_agreed_solution         0.0001235178 0.0010902603
+information_technical_advice     0.0001235178 0.0010241840
+weight_exceeding_kg              0.0001235178 0.0020153297
+plucked_drawn_without            0.0001235178 0.0019492533
+drawn_without_heads              0.0001235178 0.0019492533
+without_heads_feet               0.0001235178 0.0016849478
+necks_hearts_livers              0.0001235178 0.0016849478
+hearts_livers_gizzards           0.0001235178 0.0012884895
+livers_gizzards_known            0.0001235178 0.0012224131
+whole_wings_without              0.0001235178 0.0009250694
+wings_without_tips               0.0001235178 0.0009250694
+exceeding_exceeding_exceeding    0.0001235178 0.0030064755
+put_retail_sale                  0.0001235178 0.0033698956
+vegetable_fats_oils              0.0001235178 0.0012884895
+parts_accessories_thereof        0.0001235178 0.0009911458
+movement_certificate_eur         0.0001235178 0.0018831770
+ex-works_price_product           0.0001235178 0.0096801903
+value_non-originating_materials  0.0001235178 0.0039315449
+provided_value_non-originating   0.0001235178 0.0036011629
+                                 relative_loglikelihood1
+thickness_exceeding_mm                          2.039917
+containing_added_sugar                          3.286449
+added_sugar_sweetening                          2.394851
+sugar_sweetening_matter                         2.394851
+containing_weight_less                          2.863329
+value_materials_used                            3.100120
+upon_entry_force                                2.115266
+incorporated_made_part                          2.418949
+air_transport_services                          2.442479
+reasonable_period_time                          2.442479
+without_undue_delay                             2.082476
+years_entry_force                               4.550576
+establishment_arbitration_panel                 2.370159
+arbitration_panel_may                           2.264798
+industrial_uses_manufacture                     2.082476
+elsewhere_specified_included                    3.630039
+provided_total_value                            2.573099
+total_value_exceed                              2.573099
+fats_oils_fractions                             2.207640
+whether_refined_chemically                      2.013484
+refined_chemically_modified                     2.048575
+foodstuffs_human_consumption                    2.885972
+containing_less_weight                          3.296400
+meat_meat_offal                                 2.236627
+extracts_essences_concentrates                  2.236627
+unfit_human_consumption                         2.013484
+rectangular_including_square                    2.442479
+materials_heading_exceed                        2.688612
+plates_sheets_strip                             2.509920
+impregnated_coated_covered                      2.487942
+rate_staging_category                           5.988481
+contained_1a_wto                                2.115266
+conformity_assessment_procedures                2.292197
+plants_plant_products                           2.418949
+animals_animal_products                         2.013484
+cross-border_supply_services                    2.013484
+economic_needs_test                             2.840162
+adopt_maintain_measure                          2.013484
+made_available_public                           2.418949
+financial_service_suppliers                     2.082476
+international_maritime_transport                2.147015
+intellectual_property_right                     2.487942
+natural_legal_persons                           2.147015
+mutually_agreed_solution                        2.177787
+information_technical_advice                    2.115266
+weight_exceeding_kg                             2.792153
+plucked_drawn_without                           2.758817
+drawn_without_heads                             2.758817
+without_heads_feet                              2.613105
+necks_hearts_livers                             2.613105
+hearts_livers_gizzards                          2.344841
+livers_gizzards_known                           2.292197
+whole_wings_without                             2.013484
+wings_without_tips                              2.013484
+exceeding_exceeding_exceeding                   3.192139
+put_retail_sale                                 3.306252
+vegetable_fats_oils                             2.344841
+parts_accessories_thereof                       2.082476
+movement_certificate_eur                        2.724330
+ex-works_price_product                          4.361452
+value_non-originating_materials                 3.460403
+provided_value_non-originating                  3.372627</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(least_indicative_of_west)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                                              0            1
+world_trade_wt                                     0.0006175889 3.303819e-05
+committee_regional_trade                           0.0006175889 3.303819e-05
+regional_trade_agreements                          0.0006175889 3.303819e-05
+trade_agreements_original                          0.0006175889 3.303819e-05
+agreements_original_english                        0.0006175889 3.303819e-05
+original_english_free                              0.0006175889 3.303819e-05
+english_free_trade                                 0.0006175889 3.303819e-05
+following_text_reproduces                          0.0004940711 3.303819e-05
+free_trade_cabinet                                 0.0009881423 1.321528e-04
+trade_cabinet_ministers                            0.0009881423 1.321528e-04
+free_development_mutual                            0.0008646245 3.303819e-05
+development_mutual_economic                        0.0008646245 3.303819e-05
+mutual_economic_cooperation                        0.0008646245 3.303819e-05
+economic_cooperation_taking                        0.0004940711 3.303819e-05
+development_trade_economic                         0.0004940711 3.303819e-05
+trade_economic_cooperation                         0.0032114625 9.911458e-05
+basis_equality_mutual                              0.0008646245 9.911458e-05
+become_general_tariffs                             0.0004940711 3.303819e-05
+tariffs_trade_gatt                                 0.0011116601 1.321528e-04
+trade_gatt_sharing                                 0.0004940711 3.303819e-05
+principles_gatt_taking                             0.0004940711 3.303819e-05
+gatt_taking_account                                0.0004940711 3.303819e-05
+taking_account_results                             0.0004940711 3.303819e-05
+account_results_agreements                         0.0004940711 3.303819e-05
+uruguay_round_multilateral                         0.0004940711 3.303819e-05
+round_multilateral_trade                           0.0004940711 3.303819e-05
+multilateral_trade_negotiations                    0.0004940711 3.303819e-05
+agreed_follows_apply                               0.0008646245 3.303819e-05
+follows_apply_customs                              0.0008646245 3.303819e-05
+customs_territory_one                              0.0022233202 3.303819e-05
+territory_one_intended                             0.0012351779 3.303819e-05
+one_intended_customs                               0.0012351779 3.303819e-05
+intended_customs_territory                         0.0019762846 3.303819e-05
+documents_integral_part                            0.0006175889 3.303819e-05
+origin_september_approved                          0.0004940711 3.303819e-05
+september_approved_decision                        0.0004940711 3.303819e-05
+independent_states_directly                        0.0006175889 3.303819e-05
+states_directly_indirectly                         0.0006175889 3.303819e-05
+directly_indirectly_impose                         0.0011116601 3.303819e-05
+third_countries_mutual                             0.0006175889 3.303819e-05
+countries_mutual_trade                             0.0006175889 3.303819e-05
+mutual_trade_refrain                               0.0008646245 3.303819e-05
+trade_refrain_applying                             0.0007411067 3.303819e-05
+refrain_applying_discriminatory                    0.0004940711 3.303819e-05
+applying_discriminatory_measures                   0.0004940711 3.303819e-05
+discriminatory_measures_introducing                0.0004940711 3.303819e-05
+measures_introducing_quantitative                  0.0004940711 3.303819e-05
+introducing_quantitative_restrictions              0.0004940711 3.303819e-05
+quantitative_special_restrictions                  0.0004940711 3.303819e-05
+similar_directly_competitive                       0.0007411067 3.303819e-05
+applies_quantitative_restrictions                  0.0008646245 3.303819e-05
+exchange_regular_basis                             0.0007411067 3.303819e-05
+regular_basis_information                          0.0007411067 3.303819e-05
+taxation_banking_insurance                         0.0007411067 3.303819e-05
+customs_issues_including                           0.0004940711 3.303819e-05
+issues_including_customs                           0.0004940711 3.303819e-05
+including_customs_statistics                       0.0006175889 3.303819e-05
+national_legislation_may                           0.0007411067 6.607638e-05
+authorized_bodies_coordinate                       0.0004940711 3.303819e-05
+procedure_exchanging_information                   0.0008646245 3.303819e-05
+following_methods_agreements                       0.0004940711 3.303819e-05
+methods_agreements_enterprises                     0.0007411067 3.303819e-05
+agreements_enterprises_decisions                   0.0008646245 3.303819e-05
+enterprises_decisions_made                         0.0008646245 3.303819e-05
+general_methods_business                           0.0006175889 3.303819e-05
+one_several_enterprises                            0.0009881423 3.303819e-05
+several_enterprises_use                            0.0008646245 3.303819e-05
+measures_tariff_non-tariff                         0.0007411067 3.303819e-05
+tariff_non-tariff_regulation                       0.0008646245 3.303819e-05
+non-tariff_regulation_bilateral                    0.0004940711 3.303819e-05
+regulation_bilateral_economic                      0.0011116601 3.303819e-05
+bilateral_economic_relations                       0.0009881423 3.303819e-05
+customs_procedures_apply                           0.0006175889 3.303819e-05
+nomenclature_foreign_economic                      0.0006175889 3.303819e-05
+foreign_economic_activity                          0.0012351779 3.303819e-05
+coding_system_combined                             0.0004940711 3.303819e-05
+relevant_international_organizations               0.0006175889 3.303819e-05
+important_condition_achieving                      0.0008646245 3.303819e-05
+essential_element_process                          0.0008646245 3.303819e-05
+system_international_division                      0.0009881423 3.303819e-05
+international_division_labour                      0.0004940711 3.303819e-05
+division_labour_cooperation                        0.0004940711 3.303819e-05
+customs_territory_third                            0.0011116601 3.303819e-05
+third_countries_intended                           0.0007411067 3.303819e-05
+countries_intended_customs                         0.0007411067 3.303819e-05
+territory_third_provide                            0.0006175889 3.303819e-05
+third_provide_exporters                            0.0006175889 3.303819e-05
+provide_exporters_importers                        0.0008646245 3.303819e-05
+exporters_importers_carriers                       0.0017292490 3.303819e-05
+transit_terms_worse                                0.0009881423 3.303819e-05
+services_provided_exporters                        0.0008646245 3.303819e-05
+provided_exporters_importers                       0.0008646245 3.303819e-05
+importers_carriers_third                           0.0008646245 3.303819e-05
+carriers_third_state                               0.0004940711 3.303819e-05
+territory_states_regulated                         0.0004940711 3.303819e-05
+states_regulated_compliance                        0.0004940711 3.303819e-05
+regulated_compliance_international                 0.0004940711 3.303819e-05
+measures_generally_accepted                        0.0009881423 3.303819e-05
+generally_accepted_international                   0.0014822134 3.303819e-05
+accepted_international_practice                    0.0012351779 3.303819e-05
+necessary_protection_vital                         0.0008646245 3.303819e-05
+protection_vital_interests                         0.0008646245 3.303819e-05
+vital_interests_undoubtedly                        0.0009881423 3.303819e-05
+interests_undoubtedly_necessary                    0.0009881423 3.303819e-05
+trade_weapons_ammunition                           0.0008646245 3.303819e-05
+equipment_used_nuclear                             0.0006175889 3.303819e-05
+used_nuclear_industry                              0.0006175889 3.303819e-05
+public_order_protection                            0.0007411067 3.303819e-05
+order_protection_industrial                        0.0004940711 3.303819e-05
+protection_industrial_intellectual                 0.0012351779 3.303819e-05
+industrial_intellectual_property                   0.0012351779 3.303819e-05
+intellectual_property_gold                         0.0006175889 3.303819e-05
+property_gold_silver                               0.0006175889 3.303819e-05
+gold_silver_precious                               0.0012351779 3.303819e-05
+silver_precious_metals                             0.0011116601 3.303819e-05
+precious_metals_stones                             0.0012351779 6.607638e-05
+people_animals_plants                              0.0004940711 3.303819e-05
+policy_export_control                              0.0009881423 3.303819e-05
+regular_consultations_take                         0.0008646245 3.303819e-05
+consultations_take_mutually                        0.0004940711 3.303819e-05
+replace_bilateral_agreements                       0.0006175889 3.303819e-05
+bilateral_agreements_concluded                     0.0007411067 9.911458e-05
+agreements_concluded_earlier                       0.0007411067 3.303819e-05
+latter_either_compatible                           0.0006175889 3.303819e-05
+avoid_conflict_situations                          0.0006175889 3.303819e-05
+conflict_situations_mutual                         0.0006175889 3.303819e-05
+situations_mutual_trade                            0.0007411067 3.303819e-05
+economic_cooperation_two                           0.0014822134 6.607638e-05
+cooperation_two_countries                          0.0014822134 6.607638e-05
+two_countries_agreed                               0.0008646245 3.303819e-05
+countries_agreed_establish                         0.0004940711 3.303819e-05
+come_force_date                                    0.0012351779 3.303819e-05
+months_date_one                                    0.0009881423 6.607638e-05
+written_notification_intention                     0.0009881423 6.607638e-05
+enterprises_organizations_countries                0.0004940711 3.303819e-05
+organizations_countries_concluded                  0.0004940711 3.303819e-05
+commonwealth_independent_states                    0.0012351779 3.303819e-05
+originating_customs_territory                      0.0024703557 6.607638e-05
+customs_territory_another                          0.0019762846 3.303819e-05
+territory_another_third                            0.0007411067 3.303819e-05
+another_third_countries                            0.0007411067 3.303819e-05
+export_import_goods                                0.0004940711 3.303819e-05
+goods_originating_customs                          0.0009881423 3.303819e-05
+originating_customs_territories                    0.0004940711 3.303819e-05
+within_six_months                                  0.0007411067 9.911458e-05
+originating_territory_another                      0.0007411067 3.303819e-05
+gatt_wto_subsidies                                 0.0004940711 6.607638e-05
+wto_subsidies_countervailing                       0.0007411067 9.911458e-05
+international_monetary_fund                        0.0013586957 1.651910e-04
+shortest_possible_time                             0.0004940711 6.607638e-05
+damage_economic_interests                          0.0006175889 3.303819e-05
+beyond_customs_territory                           0.0008646245 3.303819e-05
+government_republic_belarus                        0.0024703557 3.303819e-05
+economic_interests_first                           0.0004940711 3.303819e-05
+interests_first_may                                0.0004940711 3.303819e-05
+council_heads_cis                                  0.0009881423 3.303819e-05
+regime_free_trade                                  0.0018527668 3.303819e-05
+development_effective_system                       0.0006175889 3.303819e-05
+foreign_economic_relations                         0.0009881423 3.303819e-05
+exceptions_trade_regime                            0.0007411067 3.303819e-05
+within_reasonable_limits                           0.0006175889 3.303819e-05
+principle_free_transit                             0.0007411067 3.303819e-05
+free_transit_important                             0.0007411067 3.303819e-05
+transit_important_condition                        0.0007411067 3.303819e-05
+measures_state_regulation                          0.0011116601 3.303819e-05
+international_practice_considers                   0.0006175889 3.303819e-05
+practice_considers_necessary                       0.0004940711 3.303819e-05
+considers_necessary_protection                     0.0007411067 9.911458e-05
+protection_animals_plants                          0.0007411067 3.303819e-05
+animals_plants_protection                          0.0007411067 3.303819e-05
+plants_protection_environment                      0.0006175889 3.303819e-05
+protection_environment_protection                  0.0006175889 3.303819e-05
+environment_protection_artistic                    0.0004940711 3.303819e-05
+protection_artistic_archeological                  0.0004940711 3.303819e-05
+artistic_archeological_historical                  0.0004940711 3.303819e-05
+archeological_historical_values                    0.0004940711 3.303819e-05
+property_trade_gold                                0.0006175889 3.303819e-05
+trade_gold_silver                                  0.0007411067 3.303819e-05
+necessary_measures_concern                         0.0006175889 3.303819e-05
+national_security_including                        0.0006175889 3.303819e-05
+security_including_prevention                      0.0006175889 3.303819e-05
+circumstances_international_relations              0.0006175889 3.303819e-05
+international_relations_actions                    0.0007411067 3.303819e-05
+council_heads_governments                          0.0011116601 3.303819e-05
+approved_decision_council                          0.0007411067 3.303819e-05
+decision_council_heads                             0.0007411067 3.303819e-05
+compliance_international_agreements                0.0004940711 3.303819e-05
+authorized_agency_origin                           0.0017292490 3.303819e-05
+originate_customs_territory                        0.0006175889 3.303819e-05
+sale_purchase_transportation                       0.0004940711 3.303819e-05
+purchase_transportation_distribution               0.0004940711 3.303819e-05
+goods_works_services                               0.0004940711 6.607638e-05
+agreements_enterprises_associations                0.0004940711 3.303819e-05
+free_trade_government                              0.0020998024 1.321528e-04
+government_ukraine_government                      0.0033349802 2.643055e-04
+ukraine_government_republic                        0.0044466403 3.303819e-05
+principles_general_tariffs                         0.0006175889 3.303819e-05
+duties_taxes_charges                               0.0011116601 6.607638e-05
+taxes_charges_equivalent                           0.0011116601 1.321528e-04
+harmonized_system_description                      0.0012351779 6.607638e-05
+system_description_coding                          0.0012351779 6.607638e-05
+taxes_charges_imposed                              0.0009881423 3.303819e-05
+third_countries_introduce                          0.0004940711 3.303819e-05
+third_countries_present                            0.0004940711 3.303819e-05
+intends_measures_concern                           0.0008646245 3.303819e-05
+measures_concern_following                         0.0012351779 3.303819e-05
+concern_following_protection                       0.0006175889 3.303819e-05
+irreplaceable_natural_resources                    0.0004940711 3.303819e-05
+sources_radioactive_substances                     0.0006175889 3.303819e-05
+information_customs_issues                         0.0004940711 3.303819e-05
+restrict_competition_violate                       0.0008646245 3.303819e-05
+territories_actions_one                            0.0007411067 3.303819e-05
+actions_one_several                                0.0008646245 3.303819e-05
+substantial_part_territories                       0.0008646245 3.303819e-05
+economic_relations_exchange                        0.0008646245 3.303819e-05
+based_harmonized_system                            0.0006175889 3.303819e-05
+recommendations_improvement_trade                  0.0007411067 3.303819e-05
+improvement_trade_economic                         0.0009881423 3.303819e-05
+interpretation_application_present                 0.0011116601 3.303819e-05
+russian_languages_texts                            0.0007411067 3.303819e-05
+text_russian_language                              0.0009881423 3.303819e-05
+russian_language_used                              0.0004940711 3.303819e-05
+develop_trade_economic                             0.0008646245 3.303819e-05
+corresponding_taxes_charges                        0.0008646245 3.303819e-05
+charges_imposed_similar                            0.0008646245 3.303819e-05
+warehousing_reloading_storage                      0.0008646245 3.303819e-05
+full_information_main                              0.0006175889 3.303819e-05
+information_main_reasons                           0.0006175889 3.303819e-05
+regular_basis_exchange                             0.0004940711 3.303819e-05
+related_economic_activity                          0.0004940711 3.303819e-05
+trade_investment_taxation                          0.0006175889 3.303819e-05
+investment_taxation_banking                        0.0006175889 3.303819e-05
+unfair_business_practices                          0.0008646245 3.303819e-05
+decisions_made_associations                        0.0007411067 3.303819e-05
+made_associations_enterprises                      0.0007411067 3.303819e-05
+methods_business_practices                         0.0006175889 3.303819e-05
+international_organizations_agree                  0.0004940711 3.303819e-05
+exporters_importers_exporters                      0.0006175889 3.303819e-05
+importers_exporters_importers                      0.0006175889 3.303819e-05
+research_production_related                        0.0004940711 3.303819e-05
+nuclear_industry_protection                        0.0004940711 3.303819e-05
+industry_protection_public                         0.0004940711 3.303819e-05
+metals_stones_protection                           0.0004940711 3.303819e-05
+mutually_agreed_measures                           0.0004940711 3.303819e-05
+effective_system_export                            0.0008646245 3.303819e-05
+system_export_control                              0.0008646245 3.303819e-05
+twelve_months_date                                 0.0008646245 3.303819e-05
+trade_government_ukraine                           0.0018527668 9.911458e-05
+originating_territory_state                        0.0008646245 6.607638e-05
+free_trade_ukraine                                 0.0008646245 6.607638e-05
+trade_relations_considers                          0.0004940711 6.607638e-05
+third_countries_apply                              0.0008646245 9.911458e-05
+equality_mutual_benefit                            0.0007411067 9.911458e-05
+bilateral_multilateral_agreements                  0.0004940711 6.607638e-05
+ministers_ukraine_government                       0.0016057312 1.321528e-04
+notification_intention_terminate                   0.0007411067 6.607638e-05
+intention_terminate_effect                         0.0008646245 6.607638e-05
+referred_hereinafter_confirming                    0.0004940711 3.303819e-05
+description_coding_commodities                     0.0009881423 3.303819e-05
+commodities_originating_territory                  0.0009881423 3.303819e-05
+rules_identifying_countries                        0.0008646245 3.303819e-05
+identifying_countries_commodities                  0.0008646245 3.303819e-05
+countries_commodities_origin                       0.0008646245 3.303819e-05
+commodities_originating_customs                    0.0014822134 3.303819e-05
+nothing_present_hinder                             0.0007411067 3.303819e-05
+present_hinder_establishing                        0.0006175889 3.303819e-05
+application_present_settled                        0.0008646245 3.303819e-05
+inseparable_part_present                           0.0011116601 3.303819e-05
+present_come_force                                 0.0009881423 3.303819e-05
+performance_inter-state_procedures                 0.0007411067 3.303819e-05
+inter-state_procedures_required                    0.0011116601 3.303819e-05
+procedures_required_purpose                        0.0007411067 3.303819e-05
+two_valid_copies                                   0.0013586957 3.303819e-05
+valid_copies_ukrainian                             0.0013586957 3.303819e-05
+russian_languages_text                             0.0007411067 3.303819e-05
+languages_text_equal                               0.0006175889 3.303819e-05
+text_equal_force                                   0.0006175889 3.303819e-05
+equal_force_case                                   0.0004940711 3.303819e-05
+force_case_differences                             0.0004940711 3.303819e-05
+confirming_favorable_regard                        0.0006175889 3.303819e-05
+favorable_regard_free                              0.0006175889 3.303819e-05
+regard_free_development                            0.0006175889 3.303819e-05
+desiring_develop_trade                             0.0007411067 3.303819e-05
+economic_cooperation_ukraine                       0.0007411067 3.303819e-05
+export_import_commodities                          0.0016057312 3.303819e-05
+import_commodities_originating                     0.0006175889 3.303819e-05
+territory_another_exclusion                        0.0006175889 3.303819e-05
+another_exclusion_given                            0.0006175889 3.303819e-05
+exclusion_given_trade                              0.0008646245 3.303819e-05
+given_trade_regime                                 0.0008646245 3.303819e-05
+trade_regime_conciliated                           0.0008646245 3.303819e-05
+regime_conciliated_classification                  0.0008646245 3.303819e-05
+conciliated_classification_commodities             0.0008646245 3.303819e-05
+classification_commodities_formalized              0.0007411067 3.303819e-05
+purposes_present_validity                          0.0008646245 3.303819e-05
+present_validity_period                            0.0008646245 3.303819e-05
+validity_period_commodities                        0.0008646245 3.303819e-05
+period_commodities_originating                     0.0007411067 3.303819e-05
+territories_mean_commodities                       0.0004940711 3.303819e-05
+mean_commodities_identified                        0.0007411067 3.303819e-05
+commodities_identified_rules                       0.0006175889 3.303819e-05
+identified_rules_identifying                       0.0006175889 3.303819e-05
+heads_governments_commonwealth                     0.0007411067 3.303819e-05
+governments_commonwealth_independent               0.0007411067 3.303819e-05
+indirectly_impose_commodities                      0.0006175889 3.303819e-05
+impose_commodities_come                            0.0006175889 3.303819e-05
+commodities_come_within                            0.0008646245 3.303819e-05
+come_within_purview                                0.0011116601 3.303819e-05
+within_purview_present                             0.0011116601 3.303819e-05
+purview_present_domestic                           0.0007411067 3.303819e-05
+present_domestic_taxes                             0.0007411067 3.303819e-05
+domestic_taxes_charges                             0.0007411067 3.303819e-05
+taxes_charges_exceed                               0.0007411067 3.303819e-05
+charges_exceed_corresponding                       0.0007411067 3.303819e-05
+exceed_corresponding_taxes                         0.0007411067 3.303819e-05
+imposed_similar_commodities                        0.0007411067 3.303819e-05
+similar_commodities_domestic                       0.0011116601 3.303819e-05
+commodities_domestic_manufacture                   0.0011116601 3.303819e-05
+domestic_manufacture_commodities                   0.0011116601 3.303819e-05
+manufacture_commodities_originating                0.0009881423 3.303819e-05
+commodities_originating_third                      0.0016057312 3.303819e-05
+countries_apply_warehousing                        0.0007411067 3.303819e-05
+apply_warehousing_reloading                        0.0007411067 3.303819e-05
+reloading_storage_movement                         0.0007411067 3.303819e-05
+storage_movement_commodities                       0.0007411067 3.303819e-05
+movement_commodities_originating                   0.0007411067 3.303819e-05
+another_well_payments                              0.0006175889 3.303819e-05
+well_payments_remittance                           0.0007411067 3.303819e-05
+payments_remittance_payments                       0.0009881423 3.303819e-05
+remittance_payments_rules                          0.0007411067 3.303819e-05
+payments_rules_applied                             0.0007411067 3.303819e-05
+rules_applied_similar                              0.0007411067 3.303819e-05
+applied_similar_cases                              0.0007411067 3.303819e-05
+similar_cases_commodities                          0.0007411067 3.303819e-05
+cases_commodities_commodities                      0.0007411067 3.303819e-05
+commodities_commodities_originating                0.0007411067 3.303819e-05
+import_commodities_within                          0.0006175889 3.303819e-05
+commodities_within_framework                       0.0006175889 3.303819e-05
+within_framework_present                           0.0006175889 3.303819e-05
+framework_present_may                              0.0006175889 3.303819e-05
+commodities_domestic_market                        0.0007411067 3.303819e-05
+quantities_terms_cause                             0.0006175889 3.303819e-05
+terms_cause_threaten                               0.0006175889 3.303819e-05
+threaten_cause_damage                              0.0006175889 3.303819e-05
+cause_damage_domestic                              0.0006175889 3.303819e-05
+damage_domestic_producers                          0.0006175889 3.303819e-05
+domestic_producers_similar                         0.0006175889 3.303819e-05
+producers_similar_directly                         0.0006175889 3.303819e-05
+quantitative_restrictions_present                  0.0006175889 3.303819e-05
+including_issues_trade                             0.0004940711 3.303819e-05
+issues_trade_investment                            0.0004940711 3.303819e-05
+services_well_issues                               0.0004940711 3.303819e-05
+well_issues_transport                              0.0004940711 3.303819e-05
+issues_transport_customs                           0.0004940711 3.303819e-05
+customs_statistics_included                        0.0006175889 3.303819e-05
+delay_notify_changes                               0.0004940711 3.303819e-05
+notify_changes_national                            0.0004940711 3.303819e-05
+legislation_may_impact                             0.0004940711 3.303819e-05
+may_impact_performance                             0.0004940711 3.303819e-05
+impact_performance_present                         0.0004940711 3.303819e-05
+performance_present_authorized                     0.0004940711 3.303819e-05
+present_authorized_agencies                        0.0004940711 3.303819e-05
+authorized_agencies_conciliate                     0.0007411067 3.303819e-05
+agencies_conciliate_procedure                      0.0007411067 3.303819e-05
+conciliate_procedure_exchanging                    0.0007411067 3.303819e-05
+recognize_unfair_business                          0.0006175889 3.303819e-05
+business_practices_incompatible                    0.0006175889 3.303819e-05
+practices_incompatible_purposes                    0.0006175889 3.303819e-05
+incompatible_purposes_present                      0.0007411067 3.303819e-05
+purposes_present_undertake                         0.0004940711 3.303819e-05
+associations_enterprises_well                      0.0004940711 3.303819e-05
+business_practices_aim                             0.0004940711 3.303819e-05
+practices_aim_hinder                               0.0004940711 3.303819e-05
+aim_hinder_restrict                                0.0007411067 3.303819e-05
+hinder_restrict_competition                        0.0007411067 3.303819e-05
+competition_violate_terms                          0.0007411067 3.303819e-05
+violate_terms_territories                          0.0007411067 3.303819e-05
+terms_territories_actions                          0.0006175889 3.303819e-05
+enterprises_use_dominating                         0.0007411067 3.303819e-05
+use_dominating_status                              0.0007411067 3.303819e-05
+dominating_status_restricting                      0.0007411067 3.303819e-05
+status_restricting_competition                     0.0007411067 3.303819e-05
+restricting_competition_entire                     0.0007411067 3.303819e-05
+competition_entire_substantial                     0.0007411067 3.303819e-05
+entire_substantial_part                            0.0007411067 3.303819e-05
+part_territories_effecting                         0.0004940711 3.303819e-05
+territories_effecting_measures                     0.0004940711 3.303819e-05
+effecting_measures_tariff                          0.0007411067 3.303819e-05
+measures_tariff_nontariff                          0.0012351779 3.303819e-05
+tariff_nontariff_regulation                        0.0012351779 3.303819e-05
+nontariff_regulation_bilateral                     0.0007411067 3.303819e-05
+relations_exchange_statistical                     0.0007411067 3.303819e-05
+exchange_statistical_information                   0.0007411067 3.303819e-05
+statistical_information_conducting                 0.0007411067 3.303819e-05
+information_conducting_customs                     0.0007411067 3.303819e-05
+conducting_customs_procedures                      0.0007411067 3.303819e-05
+procedures_apply_uniform                           0.0004940711 3.303819e-05
+apply_uniform_nine-digital                         0.0004940711 3.303819e-05
+uniform_nine-digital_classification                0.0004940711 3.303819e-05
+nine-digital_classification_foreign                0.0004940711 3.303819e-05
+classification_foreign_trade                       0.0004940711 3.303819e-05
+foreign_trade_commodities                          0.0004940711 3.303819e-05
+trade_commodities_cftc                             0.0004940711 3.303819e-05
+commodities_cftc_based                             0.0004940711 3.303819e-05
+cftc_based_harmonized                              0.0004940711 3.303819e-05
+coding_commodities_combined                        0.0004940711 3.303819e-05
+commodities_combined_tariff-statistical            0.0004940711 3.303819e-05
+combined_tariff-statistical_classification         0.0004940711 3.303819e-05
+tariff-statistical_classification_european         0.0004940711 3.303819e-05
+classification_european_union                      0.0004940711 3.303819e-05
+european_union_needs                               0.0004940711 3.303819e-05
+necessary_develop_commodity                        0.0004940711 3.303819e-05
+develop_commodity_classification                   0.0004940711 3.303819e-05
+commodity_classification_beyond                    0.0004940711 3.303819e-05
+classification_beyond_nine-digital                 0.0004940711 3.303819e-05
+beyond_nine-digital_limit                          0.0004940711 3.303819e-05
+nine-digital_limit_model                           0.0004940711 3.303819e-05
+limit_model_copy                                   0.0004940711 3.303819e-05
+model_copy_commodity                               0.0004940711 3.303819e-05
+copy_commodity_classification                      0.0004940711 3.303819e-05
+commodity_classification_maintained                0.0004940711 3.303819e-05
+existing_missions_corresponding                    0.0004940711 3.303819e-05
+missions_corresponding_international               0.0004940711 3.303819e-05
+corresponding_international_organizations          0.0004940711 3.303819e-05
+agree_abidance_principle                           0.0004940711 3.303819e-05
+abidance_principle_free                            0.0006175889 3.303819e-05
+condition_achieving_purposes                       0.0006175889 3.303819e-05
+achieving_purposes_present                         0.0006175889 3.303819e-05
+purposes_present_essential                         0.0006175889 3.303819e-05
+present_essential_element                          0.0006175889 3.303819e-05
+element_process_linkup                             0.0004940711 3.303819e-05
+process_linkup_system                              0.0004940711 3.303819e-05
+linkup_system_international                        0.0004940711 3.303819e-05
+international_division_labor                       0.0006175889 3.303819e-05
+division_labor_cooperation                         0.0006175889 3.303819e-05
+labor_cooperation_connection                       0.0004940711 3.303819e-05
+connection_ensure_unhindered                       0.0004940711 3.303819e-05
+ensure_unhindered_transit                          0.0004940711 3.303819e-05
+unhindered_transit_territory                       0.0004940711 3.303819e-05
+transit_territory_commodities                      0.0007411067 3.303819e-05
+territory_commodities_originating                  0.0006175889 3.303819e-05
+importers_carriers_available                       0.0007411067 3.303819e-05
+carriers_available_required                        0.0007411067 3.303819e-05
+available_required_facilities                      0.0007411067 3.303819e-05
+required_facilities_services                       0.0007411067 3.303819e-05
+facilities_services_transit                        0.0006175889 3.303819e-05
+services_transit_terms                             0.0006175889 3.303819e-05
+terms_worse_facilities                             0.0007411067 3.303819e-05
+worse_facilities_services                          0.0007411067 3.303819e-05
+facilities_services_provided                       0.0007411067 3.303819e-05
+carriers_third_procedure                           0.0004940711 3.303819e-05
+third_procedure_terms                              0.0004940711 3.303819e-05
+procedure_terms_transit                            0.0004940711 3.303819e-05
+terms_transit_freight                              0.0004940711 3.303819e-05
+present_preclude_right                             0.0009881423 3.303819e-05
+preclude_right_taking                              0.0007411067 3.303819e-05
+right_taking_measures                              0.0004940711 3.303819e-05
+taking_measures_generally                          0.0004940711 3.303819e-05
+undoubtedly_necessary_performance                  0.0006175889 3.303819e-05
+necessary_performance_international                0.0007411067 3.303819e-05
+performance_international_treaties                 0.0007411067 3.303819e-05
+international_treaties_intends                     0.0007411067 3.303819e-05
+treaties_intends_measures                          0.0007411067 3.303819e-05
+weapons_ammunition_materiel                        0.0007411067 3.303819e-05
+protection_public_morals                           0.0007411067 3.303819e-05
+public_morals_public                               0.0007411067 3.303819e-05
+morals_public_order                                0.0007411067 3.303819e-05
+order_pursue_concerted                             0.0007411067 3.303819e-05
+pursue_concerted_policy                            0.0007411067 3.303819e-05
+concerted_policy_export                            0.0007411067 3.303819e-05
+export_control_regard                              0.0007411067 3.303819e-05
+control_regard_third                               0.0007411067 3.303819e-05
+regard_third_countries                             0.0007411067 3.303819e-05
+third_countries_hold                               0.0007411067 3.303819e-05
+countries_hold_regular                             0.0007411067 3.303819e-05
+hold_regular_consultations                         0.0008646245 3.303819e-05
+export_control_present                             0.0004940711 3.303819e-05
+concluded_earlier_extent                           0.0004940711 3.303819e-05
+earlier_extent_latter                              0.0004940711 3.303819e-05
+extent_latter_either                               0.0004940711 3.303819e-05
+either_compatible_first                            0.0004940711 3.303819e-05
+compatible_first_identical                         0.0004940711 3.303819e-05
+disputes_interpretation_application                0.0007411067 3.303819e-05
+present_settled_negotiations                       0.0007411067 3.303819e-05
+strive_avoid_conflict                              0.0004940711 3.303819e-05
+order_achieve_purposes                             0.0004940711 3.303819e-05
+achieve_purposes_present                           0.0004940711 3.303819e-05
+purposes_present_draft                             0.0004940711 3.303819e-05
+present_draft_recommendations                      0.0004940711 3.303819e-05
+draft_recommendations_improvement                  0.0004940711 3.303819e-05
+countries_agreed_set                               0.0004940711 3.303819e-05
+agreed_set_joint                                   0.0004940711 3.303819e-05
+required_purpose_remain                            0.0004940711 3.303819e-05
+purpose_remain_force                               0.0004940711 3.303819e-05
+remain_force_expiry                                0.0004940711 3.303819e-05
+force_expiry_twelve                                0.0004940711 3.303819e-05
+expiry_twelve_months                               0.0007411067 3.303819e-05
+date_one_forwards                                  0.0007411067 3.303819e-05
+one_forwards_written                               0.0007411067 3.303819e-05
+forwards_written_notification                      0.0007411067 3.303819e-05
+terminate_effect_present                           0.0006175889 3.303819e-05
+effect_present_termination                         0.0006175889 3.303819e-05
+performed_validity_period                          0.0007411067 3.303819e-05
+_________________________________________signature 0.0008646245 3.303819e-05
+____________________signature_signature            0.0008646245 3.303819e-05
+cooperation_ukraine_republic                       0.0007411067 3.303819e-05
+purview_present_special                            0.0004940711 3.303819e-05
+present_special_restrictions                       0.0004940711 3.303819e-05
+special_restrictions_requirements                  0.0004940711 3.303819e-05
+restrictions_requirements_similar                  0.0004940711 3.303819e-05
+applied_similar_commodities                        0.0004940711 3.303819e-05
+reexport_commodities_relative                      0.0004940711 3.303819e-05
+commodities_relative_export                        0.0004940711 3.303819e-05
+relative_export_whose                              0.0004940711 3.303819e-05
+export_whose_customs                               0.0004940711 3.303819e-05
+whose_customs_territory                            0.0004940711 3.303819e-05
+customs_territory_commodities                      0.0004940711 3.303819e-05
+territory_commodities_originate                    0.0004940711 3.303819e-05
+commodities_originate_applies                      0.0004940711 3.303819e-05
+originate_applies_measures                         0.0004940711 3.303819e-05
+applies_measures_tariff                            0.0004940711 3.303819e-05
+commodities_may_reexported                         0.0004940711 3.303819e-05
+written_consent_terms                              0.0004940711 3.303819e-05
+case_failure_comply                                0.0004940711 3.303819e-05
+export_commodities_territory                       0.0004940711 3.303819e-05
+commodities_territory_permitted                    0.0004940711 3.303819e-05
+territory_permitted_unconciliated                  0.0004940711 3.303819e-05
+permitted_unconciliated_reexport                   0.0004940711 3.303819e-05
+reexport_mean_removal                              0.0004940711 3.303819e-05
+mean_removal_commodities                           0.0004940711 3.303819e-05
+removal_commodities_originate                      0.0004940711 3.303819e-05
+commodities_originate_customs                      0.0004940711 3.303819e-05
+customs_territory_order                            0.0004940711 3.303819e-05
+territory_order_export                             0.0004940711 3.303819e-05
+order_export_third                                 0.0004940711 3.303819e-05
+made_city_kyiv                                     0.0006175889 3.303819e-05
+december_two_valid                                 0.0004940711 3.303819e-05
+protocol_inseparable_part                          0.0004940711 3.303819e-05
+protocol_text_russian                              0.0004940711 3.303819e-05
+validity_period_made                               0.0004940711 3.303819e-05
+period_made_city                                   0.0004940711 3.303819e-05
+international_practice_state                       0.0004940711 3.303819e-05
+practice_state_regulation                          0.0004940711 3.303819e-05
+state_regulation_foreign                           0.0004940711 3.303819e-05
+regulation_foreign_trade                           0.0004940711 3.303819e-05
+foreign_trade_relations                            0.0004940711 3.303819e-05
+relations_considers_necessary                      0.0004940711 3.303819e-05
+protection_human_life                              0.0004940711 3.303819e-05
+restriction_export_products                        0.0004940711 3.303819e-05
+export_products_domestic                           0.0004940711 3.303819e-05
+products_domestic_prices                           0.0004940711 3.303819e-05
+domestic_prices_world                              0.0004940711 3.303819e-05
+prices_world_prices                                0.0004940711 3.303819e-05
+world_prices_owing                                 0.0004940711 3.303819e-05
+prices_owing_programs                              0.0004940711 3.303819e-05
+owing_programs_government                          0.0004940711 3.303819e-05
+programs_government_support                        0.0004940711 3.303819e-05
+natural_resources_upsetting                        0.0004940711 3.303819e-05
+resources_upsetting_balance                        0.0004940711 3.303819e-05
+upsetting_balance_payments                         0.0004940711 3.303819e-05
+supply_fission_material                            0.0004940711 3.303819e-05
+fission_material_sources                           0.0004940711 3.303819e-05
+material_sources_radioactive                       0.0004940711 3.303819e-05
+radioactive_substances_recovery                    0.0004940711 3.303819e-05
+substances_recovery_radioactive                    0.0004940711 3.303819e-05
+recovery_radioactive_waste                         0.0004940711 3.303819e-05
+measures_applied_times                             0.0004940711 3.303819e-05
+applied_times_war                                  0.0004940711 3.303819e-05
+times_war_emergency                                0.0004940711 3.303819e-05
+war_emergency_circumstances                        0.0004940711 3.303819e-05
+emergency_circumstances_international              0.0004940711 3.303819e-05
+relations_actions_aimed                            0.0004940711 3.303819e-05
+actions_aimed_meet                                 0.0004940711 3.303819e-05
+aimed_meet_commitments                             0.0004940711 3.303819e-05
+meet_commitments_un                                0.0004940711 3.303819e-05
+commitments_un_charter                             0.0004940711 3.303819e-05
+un_charter_preservation                            0.0004940711 3.303819e-05
+charter_preservation_international                 0.0004940711 3.303819e-05
+preservation_international_peace                   0.0004940711 3.303819e-05
+                                                   relative_loglikelihood1
+world_trade_wt                                                   -2.928159
+committee_regional_trade                                         -2.928159
+regional_trade_agreements                                        -2.928159
+trade_agreements_original                                        -2.928159
+agreements_original_english                                      -2.928159
+original_english_free                                            -2.928159
+english_free_trade                                               -2.928159
+following_text_reproduces                                        -2.705015
+free_trade_cabinet                                               -2.011868
+trade_cabinet_ministers                                          -2.011868
+free_development_mutual                                          -3.264631
+development_mutual_economic                                      -3.264631
+mutual_economic_cooperation                                      -3.264631
+economic_cooperation_taking                                      -2.705015
+development_trade_economic                                       -2.705015
+trade_economic_cooperation                                       -3.478205
+basis_equality_mutual                                            -2.166019
+become_general_tariffs                                           -2.705015
+tariffs_trade_gatt                                               -2.129651
+trade_gatt_sharing                                               -2.705015
+principles_gatt_taking                                           -2.705015
+gatt_taking_account                                              -2.705015
+taking_account_results                                           -2.705015
+account_results_agreements                                       -2.705015
+uruguay_round_multilateral                                       -2.705015
+round_multilateral_trade                                         -2.705015
+multilateral_trade_negotiations                                  -2.705015
+agreed_follows_apply                                             -3.264631
+follows_apply_customs                                            -3.264631
+customs_territory_one                                            -4.209093
+territory_one_intended                                           -3.621306
+one_intended_customs                                             -3.621306
+intended_customs_territory                                       -4.091310
+documents_integral_part                                          -2.928159
+origin_september_approved                                        -2.705015
+september_approved_decision                                      -2.705015
+independent_states_directly                                      -2.928159
+states_directly_indirectly                                       -2.928159
+directly_indirectly_impose                                       -3.515946
+third_countries_mutual                                           -2.928159
+countries_mutual_trade                                           -2.928159
+mutual_trade_refrain                                             -3.264631
+trade_refrain_applying                                           -3.110480
+refrain_applying_discriminatory                                  -2.705015
+applying_discriminatory_measures                                 -2.705015
+discriminatory_measures_introducing                              -2.705015
+measures_introducing_quantitative                                -2.705015
+introducing_quantitative_restrictions                            -2.705015
+quantitative_special_restrictions                                -2.705015
+similar_directly_competitive                                     -3.110480
+applies_quantitative_restrictions                                -3.264631
+exchange_regular_basis                                           -3.110480
+regular_basis_information                                        -3.110480
+taxation_banking_insurance                                       -3.110480
+customs_issues_including                                         -2.705015
+issues_including_customs                                         -2.705015
+including_customs_statistics                                     -2.928159
+national_legislation_may                                         -2.417333
+authorized_bodies_coordinate                                     -2.705015
+procedure_exchanging_information                                 -3.264631
+following_methods_agreements                                     -2.705015
+methods_agreements_enterprises                                   -3.110480
+agreements_enterprises_decisions                                 -3.264631
+enterprises_decisions_made                                       -3.264631
+general_methods_business                                         -2.928159
+one_several_enterprises                                          -3.398162
+several_enterprises_use                                          -3.264631
+measures_tariff_non-tariff                                       -3.110480
+tariff_non-tariff_regulation                                     -3.264631
+non-tariff_regulation_bilateral                                  -2.705015
+regulation_bilateral_economic                                    -3.515946
+bilateral_economic_relations                                     -3.398162
+customs_procedures_apply                                         -2.928159
+nomenclature_foreign_economic                                    -2.928159
+foreign_economic_activity                                        -3.621306
+coding_system_combined                                           -2.705015
+relevant_international_organizations                             -2.928159
+important_condition_achieving                                    -3.264631
+essential_element_process                                        -3.264631
+system_international_division                                    -3.398162
+international_division_labour                                    -2.705015
+division_labour_cooperation                                      -2.705015
+customs_territory_third                                          -3.515946
+third_countries_intended                                         -3.110480
+countries_intended_customs                                       -3.110480
+territory_third_provide                                          -2.928159
+third_provide_exporters                                          -2.928159
+provide_exporters_importers                                      -3.264631
+exporters_importers_carriers                                     -3.957778
+transit_terms_worse                                              -3.398162
+services_provided_exporters                                      -3.264631
+provided_exporters_importers                                     -3.264631
+importers_carriers_third                                         -3.264631
+carriers_third_state                                             -2.705015
+territory_states_regulated                                       -2.705015
+states_regulated_compliance                                      -2.705015
+regulated_compliance_international                               -2.705015
+measures_generally_accepted                                      -3.398162
+generally_accepted_international                                 -3.803628
+accepted_international_practice                                  -3.621306
+necessary_protection_vital                                       -3.264631
+protection_vital_interests                                       -3.264631
+vital_interests_undoubtedly                                      -3.398162
+interests_undoubtedly_necessary                                  -3.398162
+trade_weapons_ammunition                                         -3.264631
+equipment_used_nuclear                                           -2.928159
+used_nuclear_industry                                            -2.928159
+public_order_protection                                          -3.110480
+order_protection_industrial                                      -2.705015
+protection_industrial_intellectual                               -3.621306
+industrial_intellectual_property                                 -3.621306
+intellectual_property_gold                                       -2.928159
+property_gold_silver                                             -2.928159
+gold_silver_precious                                             -3.621306
+silver_precious_metals                                           -3.515946
+precious_metals_stones                                           -2.928159
+people_animals_plants                                            -2.705015
+policy_export_control                                            -3.398162
+regular_consultations_take                                       -3.264631
+consultations_take_mutually                                      -2.705015
+replace_bilateral_agreements                                     -2.928159
+bilateral_agreements_concluded                                   -2.011868
+agreements_concluded_earlier                                     -3.110480
+latter_either_compatible                                         -2.928159
+avoid_conflict_situations                                        -2.928159
+conflict_situations_mutual                                       -2.928159
+situations_mutual_trade                                          -3.110480
+economic_cooperation_two                                         -3.110480
+cooperation_two_countries                                        -3.110480
+two_countries_agreed                                             -3.264631
+countries_agreed_establish                                       -2.705015
+come_force_date                                                  -3.621306
+months_date_one                                                  -2.705015
+written_notification_intention                                   -2.705015
+enterprises_organizations_countries                              -2.705015
+organizations_countries_concluded                                -2.705015
+commonwealth_independent_states                                  -3.621306
+originating_customs_territory                                    -3.621306
+customs_territory_another                                        -4.091310
+territory_another_third                                          -3.110480
+another_third_countries                                          -3.110480
+export_import_goods                                              -2.705015
+goods_originating_customs                                        -3.398162
+originating_customs_territories                                  -2.705015
+within_six_months                                                -2.011868
+originating_territory_another                                    -3.110480
+gatt_wto_subsidies                                               -2.011868
+wto_subsidies_countervailing                                     -2.011868
+international_monetary_fund                                      -2.107178
+shortest_possible_time                                           -2.011868
+damage_economic_interests                                        -2.928159
+beyond_customs_territory                                         -3.264631
+government_republic_belarus                                      -4.314453
+economic_interests_first                                         -2.705015
+interests_first_may                                              -2.705015
+council_heads_cis                                                -3.398162
+regime_free_trade                                                -4.026771
+development_effective_system                                     -2.928159
+foreign_economic_relations                                       -3.398162
+exceptions_trade_regime                                          -3.110480
+within_reasonable_limits                                         -2.928159
+principle_free_transit                                           -3.110480
+free_transit_important                                           -3.110480
+transit_important_condition                                      -3.110480
+measures_state_regulation                                        -3.515946
+international_practice_considers                                 -2.928159
+practice_considers_necessary                                     -2.705015
+considers_necessary_protection                                   -2.011868
+protection_animals_plants                                        -3.110480
+animals_plants_protection                                        -3.110480
+plants_protection_environment                                    -2.928159
+protection_environment_protection                                -2.928159
+environment_protection_artistic                                  -2.705015
+protection_artistic_archeological                                -2.705015
+artistic_archeological_historical                                -2.705015
+archeological_historical_values                                  -2.705015
+property_trade_gold                                              -2.928159
+trade_gold_silver                                                -3.110480
+necessary_measures_concern                                       -2.928159
+national_security_including                                      -2.928159
+security_including_prevention                                    -2.928159
+circumstances_international_relations                            -2.928159
+international_relations_actions                                  -3.110480
+council_heads_governments                                        -3.515946
+approved_decision_council                                        -3.110480
+decision_council_heads                                           -3.110480
+compliance_international_agreements                              -2.705015
+authorized_agency_origin                                         -3.957778
+originate_customs_territory                                      -2.928159
+sale_purchase_transportation                                     -2.705015
+purchase_transportation_distribution                             -2.705015
+goods_works_services                                             -2.011868
+agreements_enterprises_associations                              -2.705015
+free_trade_government                                            -2.765640
+government_ukraine_government                                    -2.535116
+ukraine_government_republic                                      -4.902240
+principles_general_tariffs                                       -2.928159
+duties_taxes_charges                                             -2.822798
+taxes_charges_equivalent                                         -2.129651
+harmonized_system_description                                    -2.928159
+system_description_coding                                        -2.928159
+taxes_charges_imposed                                            -3.398162
+third_countries_introduce                                        -2.705015
+third_countries_present                                          -2.705015
+intends_measures_concern                                         -3.264631
+measures_concern_following                                       -3.621306
+concern_following_protection                                     -2.928159
+irreplaceable_natural_resources                                  -2.705015
+sources_radioactive_substances                                   -2.928159
+information_customs_issues                                       -2.705015
+restrict_competition_violate                                     -3.264631
+territories_actions_one                                          -3.110480
+actions_one_several                                              -3.264631
+substantial_part_territories                                     -3.264631
+economic_relations_exchange                                      -3.264631
+based_harmonized_system                                          -2.928159
+recommendations_improvement_trade                                -3.110480
+improvement_trade_economic                                       -3.398162
+interpretation_application_present                               -3.515946
+russian_languages_texts                                          -3.110480
+text_russian_language                                            -3.398162
+russian_language_used                                            -2.705015
+develop_trade_economic                                           -3.264631
+corresponding_taxes_charges                                      -3.264631
+charges_imposed_similar                                          -3.264631
+warehousing_reloading_storage                                    -3.264631
+full_information_main                                            -2.928159
+information_main_reasons                                         -2.928159
+regular_basis_exchange                                           -2.705015
+related_economic_activity                                        -2.705015
+trade_investment_taxation                                        -2.928159
+investment_taxation_banking                                      -2.928159
+unfair_business_practices                                        -3.264631
+decisions_made_associations                                      -3.110480
+made_associations_enterprises                                    -3.110480
+methods_business_practices                                       -2.928159
+international_organizations_agree                                -2.705015
+exporters_importers_exporters                                    -2.928159
+importers_exporters_importers                                    -2.928159
+research_production_related                                      -2.705015
+nuclear_industry_protection                                      -2.705015
+industry_protection_public                                       -2.705015
+metals_stones_protection                                         -2.705015
+mutually_agreed_measures                                         -2.705015
+effective_system_export                                          -3.264631
+system_export_control                                            -3.264631
+twelve_months_date                                               -3.264631
+trade_government_ukraine                                         -2.928159
+originating_territory_state                                      -2.571484
+free_trade_ukraine                                               -2.571484
+trade_relations_considers                                        -2.011868
+third_countries_apply                                            -2.166019
+equality_mutual_benefit                                          -2.011868
+bilateral_multilateral_agreements                                -2.011868
+ministers_ukraine_government                                     -2.497376
+notification_intention_terminate                                 -2.417333
+intention_terminate_effect                                       -2.571484
+referred_hereinafter_confirming                                  -2.705015
+description_coding_commodities                                   -3.398162
+commodities_originating_territory                                -3.398162
+rules_identifying_countries                                      -3.264631
+identifying_countries_commodities                                -3.264631
+countries_commodities_origin                                     -3.264631
+commodities_originating_customs                                  -3.803628
+nothing_present_hinder                                           -3.110480
+present_hinder_establishing                                      -2.928159
+application_present_settled                                      -3.264631
+inseparable_part_present                                         -3.515946
+present_come_force                                               -3.398162
+performance_inter-state_procedures                               -3.110480
+inter-state_procedures_required                                  -3.515946
+procedures_required_purpose                                      -3.110480
+two_valid_copies                                                 -3.716616
+valid_copies_ukrainian                                           -3.716616
+russian_languages_text                                           -3.110480
+languages_text_equal                                             -2.928159
+text_equal_force                                                 -2.928159
+equal_force_case                                                 -2.705015
+force_case_differences                                           -2.705015
+confirming_favorable_regard                                      -2.928159
+favorable_regard_free                                            -2.928159
+regard_free_development                                          -2.928159
+desiring_develop_trade                                           -3.110480
+economic_cooperation_ukraine                                     -3.110480
+export_import_commodities                                        -3.883670
+import_commodities_originating                                   -2.928159
+territory_another_exclusion                                      -2.928159
+another_exclusion_given                                          -2.928159
+exclusion_given_trade                                            -3.264631
+given_trade_regime                                               -3.264631
+trade_regime_conciliated                                         -3.264631
+regime_conciliated_classification                                -3.264631
+conciliated_classification_commodities                           -3.264631
+classification_commodities_formalized                            -3.110480
+purposes_present_validity                                        -3.264631
+present_validity_period                                          -3.264631
+validity_period_commodities                                      -3.264631
+period_commodities_originating                                   -3.110480
+territories_mean_commodities                                     -2.705015
+mean_commodities_identified                                      -3.110480
+commodities_identified_rules                                     -2.928159
+identified_rules_identifying                                     -2.928159
+heads_governments_commonwealth                                   -3.110480
+governments_commonwealth_independent                             -3.110480
+indirectly_impose_commodities                                    -2.928159
+impose_commodities_come                                          -2.928159
+commodities_come_within                                          -3.264631
+come_within_purview                                              -3.515946
+within_purview_present                                           -3.515946
+purview_present_domestic                                         -3.110480
+present_domestic_taxes                                           -3.110480
+domestic_taxes_charges                                           -3.110480
+taxes_charges_exceed                                             -3.110480
+charges_exceed_corresponding                                     -3.110480
+exceed_corresponding_taxes                                       -3.110480
+imposed_similar_commodities                                      -3.110480
+similar_commodities_domestic                                     -3.515946
+commodities_domestic_manufacture                                 -3.515946
+domestic_manufacture_commodities                                 -3.515946
+manufacture_commodities_originating                              -3.398162
+commodities_originating_third                                    -3.883670
+countries_apply_warehousing                                      -3.110480
+apply_warehousing_reloading                                      -3.110480
+reloading_storage_movement                                       -3.110480
+storage_movement_commodities                                     -3.110480
+movement_commodities_originating                                 -3.110480
+another_well_payments                                            -2.928159
+well_payments_remittance                                         -3.110480
+payments_remittance_payments                                     -3.398162
+remittance_payments_rules                                        -3.110480
+payments_rules_applied                                           -3.110480
+rules_applied_similar                                            -3.110480
+applied_similar_cases                                            -3.110480
+similar_cases_commodities                                        -3.110480
+cases_commodities_commodities                                    -3.110480
+commodities_commodities_originating                              -3.110480
+import_commodities_within                                        -2.928159
+commodities_within_framework                                     -2.928159
+within_framework_present                                         -2.928159
+framework_present_may                                            -2.928159
+commodities_domestic_market                                      -3.110480
+quantities_terms_cause                                           -2.928159
+terms_cause_threaten                                             -2.928159
+threaten_cause_damage                                            -2.928159
+cause_damage_domestic                                            -2.928159
+damage_domestic_producers                                        -2.928159
+domestic_producers_similar                                       -2.928159
+producers_similar_directly                                       -2.928159
+quantitative_restrictions_present                                -2.928159
+including_issues_trade                                           -2.705015
+issues_trade_investment                                          -2.705015
+services_well_issues                                             -2.705015
+well_issues_transport                                            -2.705015
+issues_transport_customs                                         -2.705015
+customs_statistics_included                                      -2.928159
+delay_notify_changes                                             -2.705015
+notify_changes_national                                          -2.705015
+legislation_may_impact                                           -2.705015
+may_impact_performance                                           -2.705015
+impact_performance_present                                       -2.705015
+performance_present_authorized                                   -2.705015
+present_authorized_agencies                                      -2.705015
+authorized_agencies_conciliate                                   -3.110480
+agencies_conciliate_procedure                                    -3.110480
+conciliate_procedure_exchanging                                  -3.110480
+recognize_unfair_business                                        -2.928159
+business_practices_incompatible                                  -2.928159
+practices_incompatible_purposes                                  -2.928159
+incompatible_purposes_present                                    -3.110480
+purposes_present_undertake                                       -2.705015
+associations_enterprises_well                                    -2.705015
+business_practices_aim                                           -2.705015
+practices_aim_hinder                                             -2.705015
+aim_hinder_restrict                                              -3.110480
+hinder_restrict_competition                                      -3.110480
+competition_violate_terms                                        -3.110480
+violate_terms_territories                                        -3.110480
+terms_territories_actions                                        -2.928159
+enterprises_use_dominating                                       -3.110480
+use_dominating_status                                            -3.110480
+dominating_status_restricting                                    -3.110480
+status_restricting_competition                                   -3.110480
+restricting_competition_entire                                   -3.110480
+competition_entire_substantial                                   -3.110480
+entire_substantial_part                                          -3.110480
+part_territories_effecting                                       -2.705015
+territories_effecting_measures                                   -2.705015
+effecting_measures_tariff                                        -3.110480
+measures_tariff_nontariff                                        -3.621306
+tariff_nontariff_regulation                                      -3.621306
+nontariff_regulation_bilateral                                   -3.110480
+relations_exchange_statistical                                   -3.110480
+exchange_statistical_information                                 -3.110480
+statistical_information_conducting                               -3.110480
+information_conducting_customs                                   -3.110480
+conducting_customs_procedures                                    -3.110480
+procedures_apply_uniform                                         -2.705015
+apply_uniform_nine-digital                                       -2.705015
+uniform_nine-digital_classification                              -2.705015
+nine-digital_classification_foreign                              -2.705015
+classification_foreign_trade                                     -2.705015
+foreign_trade_commodities                                        -2.705015
+trade_commodities_cftc                                           -2.705015
+commodities_cftc_based                                           -2.705015
+cftc_based_harmonized                                            -2.705015
+coding_commodities_combined                                      -2.705015
+commodities_combined_tariff-statistical                          -2.705015
+combined_tariff-statistical_classification                       -2.705015
+tariff-statistical_classification_european                       -2.705015
+classification_european_union                                    -2.705015
+european_union_needs                                             -2.705015
+necessary_develop_commodity                                      -2.705015
+develop_commodity_classification                                 -2.705015
+commodity_classification_beyond                                  -2.705015
+classification_beyond_nine-digital                               -2.705015
+beyond_nine-digital_limit                                        -2.705015
+nine-digital_limit_model                                         -2.705015
+limit_model_copy                                                 -2.705015
+model_copy_commodity                                             -2.705015
+copy_commodity_classification                                    -2.705015
+commodity_classification_maintained                              -2.705015
+existing_missions_corresponding                                  -2.705015
+missions_corresponding_international                             -2.705015
+corresponding_international_organizations                        -2.705015
+agree_abidance_principle                                         -2.705015
+abidance_principle_free                                          -2.928159
+condition_achieving_purposes                                     -2.928159
+achieving_purposes_present                                       -2.928159
+purposes_present_essential                                       -2.928159
+present_essential_element                                        -2.928159
+element_process_linkup                                           -2.705015
+process_linkup_system                                            -2.705015
+linkup_system_international                                      -2.705015
+international_division_labor                                     -2.928159
+division_labor_cooperation                                       -2.928159
+labor_cooperation_connection                                     -2.705015
+connection_ensure_unhindered                                     -2.705015
+ensure_unhindered_transit                                        -2.705015
+unhindered_transit_territory                                     -2.705015
+transit_territory_commodities                                    -3.110480
+territory_commodities_originating                                -2.928159
+importers_carriers_available                                     -3.110480
+carriers_available_required                                      -3.110480
+available_required_facilities                                    -3.110480
+required_facilities_services                                     -3.110480
+facilities_services_transit                                      -2.928159
+services_transit_terms                                           -2.928159
+terms_worse_facilities                                           -3.110480
+worse_facilities_services                                        -3.110480
+facilities_services_provided                                     -3.110480
+carriers_third_procedure                                         -2.705015
+third_procedure_terms                                            -2.705015
+procedure_terms_transit                                          -2.705015
+terms_transit_freight                                            -2.705015
+present_preclude_right                                           -3.398162
+preclude_right_taking                                            -3.110480
+right_taking_measures                                            -2.705015
+taking_measures_generally                                        -2.705015
+undoubtedly_necessary_performance                                -2.928159
+necessary_performance_international                              -3.110480
+performance_international_treaties                               -3.110480
+international_treaties_intends                                   -3.110480
+treaties_intends_measures                                        -3.110480
+weapons_ammunition_materiel                                      -3.110480
+protection_public_morals                                         -3.110480
+public_morals_public                                             -3.110480
+morals_public_order                                              -3.110480
+order_pursue_concerted                                           -3.110480
+pursue_concerted_policy                                          -3.110480
+concerted_policy_export                                          -3.110480
+export_control_regard                                            -3.110480
+control_regard_third                                             -3.110480
+regard_third_countries                                           -3.110480
+third_countries_hold                                             -3.110480
+countries_hold_regular                                           -3.110480
+hold_regular_consultations                                       -3.264631
+export_control_present                                           -2.705015
+concluded_earlier_extent                                         -2.705015
+earlier_extent_latter                                            -2.705015
+extent_latter_either                                             -2.705015
+either_compatible_first                                          -2.705015
+compatible_first_identical                                       -2.705015
+disputes_interpretation_application                              -3.110480
+present_settled_negotiations                                     -3.110480
+strive_avoid_conflict                                            -2.705015
+order_achieve_purposes                                           -2.705015
+achieve_purposes_present                                         -2.705015
+purposes_present_draft                                           -2.705015
+present_draft_recommendations                                    -2.705015
+draft_recommendations_improvement                                -2.705015
+countries_agreed_set                                             -2.705015
+agreed_set_joint                                                 -2.705015
+required_purpose_remain                                          -2.705015
+purpose_remain_force                                             -2.705015
+remain_force_expiry                                              -2.705015
+force_expiry_twelve                                              -2.705015
+expiry_twelve_months                                             -3.110480
+date_one_forwards                                                -3.110480
+one_forwards_written                                             -3.110480
+forwards_written_notification                                    -3.110480
+terminate_effect_present                                         -2.928159
+effect_present_termination                                       -2.928159
+performed_validity_period                                        -3.110480
+_________________________________________signature               -3.264631
+____________________signature_signature                          -3.264631
+cooperation_ukraine_republic                                     -3.110480
+purview_present_special                                          -2.705015
+present_special_restrictions                                     -2.705015
+special_restrictions_requirements                                -2.705015
+restrictions_requirements_similar                                -2.705015
+applied_similar_commodities                                      -2.705015
+reexport_commodities_relative                                    -2.705015
+commodities_relative_export                                      -2.705015
+relative_export_whose                                            -2.705015
+export_whose_customs                                             -2.705015
+whose_customs_territory                                          -2.705015
+customs_territory_commodities                                    -2.705015
+territory_commodities_originate                                  -2.705015
+commodities_originate_applies                                    -2.705015
+originate_applies_measures                                       -2.705015
+applies_measures_tariff                                          -2.705015
+commodities_may_reexported                                       -2.705015
+written_consent_terms                                            -2.705015
+case_failure_comply                                              -2.705015
+export_commodities_territory                                     -2.705015
+commodities_territory_permitted                                  -2.705015
+territory_permitted_unconciliated                                -2.705015
+permitted_unconciliated_reexport                                 -2.705015
+reexport_mean_removal                                            -2.705015
+mean_removal_commodities                                         -2.705015
+removal_commodities_originate                                    -2.705015
+commodities_originate_customs                                    -2.705015
+customs_territory_order                                          -2.705015
+territory_order_export                                           -2.705015
+order_export_third                                               -2.705015
+made_city_kyiv                                                   -2.928159
+december_two_valid                                               -2.705015
+protocol_inseparable_part                                        -2.705015
+protocol_text_russian                                            -2.705015
+validity_period_made                                             -2.705015
+period_made_city                                                 -2.705015
+international_practice_state                                     -2.705015
+practice_state_regulation                                        -2.705015
+state_regulation_foreign                                         -2.705015
+regulation_foreign_trade                                         -2.705015
+foreign_trade_relations                                          -2.705015
+relations_considers_necessary                                    -2.705015
+protection_human_life                                            -2.705015
+restriction_export_products                                      -2.705015
+export_products_domestic                                         -2.705015
+products_domestic_prices                                         -2.705015
+domestic_prices_world                                            -2.705015
+prices_world_prices                                              -2.705015
+world_prices_owing                                               -2.705015
+prices_owing_programs                                            -2.705015
+owing_programs_government                                        -2.705015
+programs_government_support                                      -2.705015
+natural_resources_upsetting                                      -2.705015
+resources_upsetting_balance                                      -2.705015
+upsetting_balance_payments                                       -2.705015
+supply_fission_material                                          -2.705015
+fission_material_sources                                         -2.705015
+material_sources_radioactive                                     -2.705015
+radioactive_substances_recovery                                  -2.705015
+substances_recovery_radioactive                                  -2.705015
+recovery_radioactive_waste                                       -2.705015
+measures_applied_times                                           -2.705015
+applied_times_war                                                -2.705015
+times_war_emergency                                              -2.705015
+war_emergency_circumstances                                      -2.705015
+emergency_circumstances_international                            -2.705015
+relations_actions_aimed                                          -2.705015
+actions_aimed_meet                                               -2.705015
+aimed_meet_commitments                                           -2.705015
+meet_commitments_un                                              -2.705015
+commitments_un_charter                                           -2.705015
+un_charter_preservation                                          -2.705015
+charter_preservation_international                               -2.705015
+preservation_international_peace                                 -2.705015</code></pre>
+</div>
+</div>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+      window.quartoDecorateExternalLinks = function (root) {
+     var links = (root || window.document).querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+          if (!link.classList.contains('no-external-icon')) {
+          }
+        }
+      }
+      };
+      window.quartoDecorateExternalLinks(window.document);
+    // Esc closes the popup (WCAG 1.4.13) and focus leaving both trigger and
+    // popup closes it (WCAG 2.4.11); tippy handles neither for interactive popups.
+    const hideOnEscAndFocusOut = {
+      name: 'hideOnEscAndFocusOut',
+      defaultValue: true,
+      fn(instance) {
+        const dismiss = () => {
+          // A show scheduled by the trigger delay would otherwise reopen it
+          instance.clearDelayTimeouts();
+          instance.hide();
+        };
+        const onKeyDown = (event) => {
+          if (event.key !== 'Escape') {
+            return;
+          }
+          // Keep Esc from also reaching page handlers (e.g. reveal.js overview),
+          // except an open reveal.js slide menu, which Esc should close too.
+          // The menu handles keys only when its keyboard option is on.
+          const menuHandlesEsc = window.Reveal?.getPlugin?.('menu')?.isOpen() &&
+            window.Reveal.getConfig().menu?.keyboard !== false;
+          if (!menuHandlesEsc) {
+            event.stopPropagation();
+          }
+          if (instance.popper.contains(window.document.activeElement)) {
+            // Disabled while refocusing so the focus trigger does not reopen it
+            instance.disable();
+            instance.reference.focus();
+            instance.enable();
+          }
+          dismiss();
+        };
+        const onFocusOut = (event) => {
+          const target = event.relatedTarget;
+          if (target && !instance.reference.contains(target) &&
+              !instance.popper.contains(target)) {
+            dismiss();
+          }
+        };
+        // On the trigger too: a click trigger (code-annotations: select) has no
+        // blur handling. Attached for the instance's lifetime so leaving the
+        // trigger also cancels a show still pending on the trigger delay.
+        instance.reference.addEventListener('focusout', onFocusOut);
+        return {
+          onShow() {
+            window.document.addEventListener('keydown', onKeyDown, true);
+            instance.popper.addEventListener('focusout', onFocusOut);
+          },
+          onHide() {
+            window.document.removeEventListener('keydown', onKeyDown, true);
+            instance.popper.removeEventListener('focusout', onFocusOut);
+          },
+          onDestroy() {
+            instance.reference.removeEventListener('focusout', onFocusOut);
+          },
+        };
+      },
+    };
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+        plugins: [hideOnEscAndFocusOut],
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          // Each band is positioned against its own containing block, which is
+          // not the offsetParent of the lines, so place it from client rects.
+          const placeBand = (band, firstEl, lastEl, codeBlock) => {
+            const container = band.offsetParent;
+            if (container === null) {
+              return;
+            }
+            const containerRect = container.getBoundingClientRect();
+            // Reveal.js scales slides with a transform, so convert client
+            // pixels back to the CSS pixels of the container.
+            const scale = containerRect.height / container.offsetHeight || 1;
+            const firstRect = firstEl.getBoundingClientRect();
+            const lastRect = lastEl.getBoundingClientRect();
+            const top = (firstRect.top - containerRect.top) / scale - container.clientTop + container.scrollTop;
+            const height = (lastRect.bottom - firstRect.top) / scale;
+            band.style.top = top - 2 + "px";
+            band.style.height = height + 4 + "px";
+            if (codeBlock) {
+              // Without the copy button wrapper, the containing block is wider
+              // than the code block, so span the code block explicitly.
+              const blockRect = codeBlock.getBoundingClientRect();
+              band.style.left = (blockRect.left - containerRect.left) / scale - container.clientLeft + container.scrollLeft + "px";
+              band.style.width = blockRect.width / scale + "px";
+            }
+          };
+          if (lineIds.length > 0) {
+            const el = window.document.getElementById(lineIds[0]);
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const parent = el.parentElement.parentElement;
+            // cook up a div (if necessary) and position it
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            placeBand(div, el, lastEl, parent.closest("div.sourceCode") || parent);
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            placeBand(gutterDiv, el, lastEl);
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+  <script type="application/javascript">
+  window.quartoScrollableRegionsLabels = {"code":"Scrollable code","output":"Scrollable output"};
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
