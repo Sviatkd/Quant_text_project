@@ -1,10 +1,14 @@
 ---
-title: "Untitled"
-format: html
+title: "Preliminary Results"
+format: 
+  html: 
+    code-fold: true
+    code-tools: true
 execute:
- message: false
- warning: false
+  message: false
+  warning: false
 ---
+
 
 
 ```{r}
@@ -79,7 +83,7 @@ docnames(my_corpus) <- my_corpus$agreement
  textk = my_corpus
 tokk =  tokens(textk,remove_punct=TRUE,remove_symbols = TRUE, remove_numbers = TRUE)
 toks_stopk = tokens_remove(tokk,c(stopwords::stopwords("english"),"the","of",",","and","‘","contracting","shall","parties","or",".",":","-",";","ofthe",")","party","treaty",",","accordance","paragraph","provisions","agreement","country","sides","article","chapter","Annex","appendix","party","Appendix","shall")) 
-twdfmk <- dfm(toks_stopk) |> dfm_trim(min_docfreq = 3) 
+twdfmk <- dfm(toks_stopk) |> dfm_trim(min_docfreq = 3) |> dfm_tfidf()
 western = c(0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1)
 
 ```
@@ -153,7 +157,7 @@ cat(sprintf("Linear SVM:    %.2f%%\n", acc_svm * 100))
 
 ```{r}
 toks_stopk = tokens_remove(tokk,c(stopwords::stopwords("english"),"the","of",",","and","‘","contracting","shall","parties","or",".",":","-",";","ofthe",")","party","treaty",",","accordance","paragraph","provisions","agreement","country","sides","article","chapter","Annex","appendix","party","Appendix","shall")) |> tokens_ngrams(n=2L)
-twdfmk <- dfm(toks_stopk) |> dfm_trim(min_docfreq = 3) 
+twdfmk <- dfm(toks_stopk) |> dfm_trim(min_docfreq = 3) |> dfm_tfidf()
 western = c(0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1)
 
 ```
@@ -227,20 +231,16 @@ cat(sprintf("Linear SVM:    %.2f%%\n", acc_svm * 100))
 
 ```{r}
 toks_stopk = tokens_remove(tokk,c(stopwords::stopwords("english"),"the","of",",","and","‘","contracting","shall","parties","or",".",":","-",";","ofthe",")","party","treaty",",","accordance","paragraph","provisions","agreement","country","sides","article","chapter","Annex","appendix","party","Appendix","shall")) |> tokens_ngrams(n=3L)
-twdfmk <- dfm(toks_stopk) |> dfm_trim(min_docfreq = 3) 
+twdfmk <- dfm(toks_stopk) |> dfm_trim(min_docfreq = 3) |> dfm_tfidf()
 western = c(0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1)
 
 ```
 ```{r}
 set.seed(123)
-clusthier = twdfmk |> dist(method = "canberra") |>  hclust()
-plot(clusthier)
-clmod=skmeans(as.matrix(twdfmk),k = 4)
-clred = t(as.data.frame(clmod$prototypes))
-clmod$cluster
 forestngram = randomForest(x=as.matrix(twdfmk),y=factor(western),ntree=1000)
 nbngram = textmodel_nb(twdfmk,western)
 svmngram = textmodel_svmlin(twdfmk,western)
+
 
 ```
 
@@ -298,13 +298,28 @@ cat(sprintf("Random Forest: %.2f%%\n", acc_rf * 100))
 cat(sprintf("Naive Bayes:   %.2f%%\n", acc_nb * 100))
 cat(sprintf("Linear SVM:    %.2f%%\n", acc_svm * 100))
 ```
-
+```{r}
+set.seed(123)
+clusthier = twdfmk |> dist(method = "canberra") |>  hclust()
+plot(clusthier)
+clmod=skmeans(as.matrix(twdfmk),k = 4)
+clred = as.data.frame(t(clmod$prototypes))
+clmod$cluster
+clred |>
+  arrange(desc(`4`)) |> head(15)
+clred |>
+  arrange(desc(`1`)) |> head(15)
+```
 ```{r}
 varImpPlot(forestngram)
 nbresults = as.data.frame(t(nbngram$param))
 nbresults$relative_loglikelihood1 = log(nbresults$`1`/nbresults$`0`)
 most_indicative_of_west = filter(nbresults,relative_loglikelihood1>=2)
 least_indicative_of_west = filter(nbresults,relative_loglikelihood1 <= -2)
-print(most_indicative_of_west)
-print(least_indicative_of_west)
+ most_indicative_of_west |>
+  rownames_to_column(var = "feature") |>
+   arrange(desc(relative_loglikelihood1)) |> select(feature,relative_loglikelihood1) |> head(40)
+ least_indicative_of_west |>
+  rownames_to_column(var = "feature") |> 
+   arrange(relative_loglikelihood1) |> select(feature,relative_loglikelihood1) |> head(40)
 ```
