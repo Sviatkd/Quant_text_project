@@ -323,3 +323,11 @@ least_indicative_of_west = filter(nbresults,relative_loglikelihood1 <= -2)
   rownames_to_column(var = "feature") |> 
    arrange(relative_loglikelihood1) |> select(feature,relative_loglikelihood1) |> head(40)
 ```
+
+```{r}
+library(seededlda)
+topicmod = textmodel_lda(twdfmk,k=10)
+topics(topicmod)
+seededlda::terms(topicmod)
+
+```

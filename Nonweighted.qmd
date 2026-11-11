@@ -1,0 +1,331 @@
+---
+title: "Preliminary Results"
+format: 
+  html: 
+    code-fold: true
+    code-tools: true
+execute:
+  message: false
+  warning: false
+---
+
+
+
+```{r}
+library(tesseract)
+library(pdftools)
+library("quanteda.textmodels")
+library(factoextra)
+library(streamR)
+library(tidyverse)
+library(quanteda)
+library(quanteda.corpora)
+library(quanteda.textplots)
+library(quanteda.textstats)
+library(quanteda.textmodels)
+library(skmeans)
+library(randomForest)
+```
+```{r}
+pdfkyrgyz = pdftools::pdf_text("D:\\Нова папка\\pdfs\\74-1.pdf")
+pdfCIS2011 = pdftools::pdf_text("D:\\Нова папка\\pdfs\\Stpetersburg.pdf")
+pdfFTA1994 = pdftools::pdf_text("D:\\Нова папка\\pdfs\\82-1.pdf")
+pdfGeorgia = pdftools::pdf_text("D:\\Нова папка\\pdfs\\121-1.pdf")
+pdfArmenia = pdftools::pdf_text("D:\\Нова папка\\pdfs\\171-1.pdf")
+pdfMontenegro = pdftools::pdf_text("D:\\Нова папка\\pdfs\\MUFTA Eng  17 11 2011.pdf")
+pdfMacedonia = pdftools::pdf_text("D:\\Нова папка\\pdfs\\Ukraine-FYROM-Agreement.pdf")
+pdfEU = pdftools::pdf_text("D:\\Нова папка\\pdfs\\OJ_L_2014_161_FULL_EN_TXT.pdf")
+pdfIsrael = pdftools::pdf_text("D:\\Нова папка\\pdfs\\sahar-hutz_agreements_israel-ukraine-fta-en.pdf")
+pdfCanada = pdftools::pdf_text("D:\\Нова папка\\pdfs\\CanadaEng.pdf")
+pdfMoldova = pdftools::pdf_text("D:\\Нова папка\\pdfs\\FTA Ukraine - Moldova_ToA.pdf")
+pdfMoldova    <- pdf_text("D:\\Нова папка\\pdfs\\FTA Ukraine - Moldova_ToA.pdf")
+pdfAzerbaijan <- pdf_text("D:\\Нова папка\\pdfs\\FTA Ukraine - Azerbaijan_ToA.pdf")
+pdfBelarus    <- pdf_text("D:\\Нова папка\\pdfs\\FTA Ukraine - Belarus_ToA.pdf")
+pdfKazakh     <- pdf_text("D:\\Нова папка\\pdfs\\FTA Ukraine - Kazakhstan_ToA.pdf")
+pdfTajik      <- pdf_text("D:\\Нова папка\\pdfs\\FTA Ukraine - Tajikistan_ToA.pdf")
+pdfUzbek      <- pdf_text("D:\\Нова папка\\pdfs\\FTA Ukraine - Uzbekistan_ToA.pdf")
+pdfUK = pdf_text("D:\\Нова папка\\pdfs\\CS_Ukraine_1.2020_UK_Ukraine_Political_Free_Trade_Strat_Partner_Agreement.pdf")
+```
+
+```{r}
+library(dplyr)
+library(tibble)
+
+# Combine them into a single tidy tibble corpus
+fta_corpus <- tibble(
+  agreement = c("Kyrgyzstan", "CIS_2011", "FTA_1994", "Georgia", "Armenia", 
+                "Montenegro", "Macedonia", "EU", "Israel", "Canada", 
+                "Moldova", "Azerbaijan", "Belarus", "Kazakhstan", "Tajikistan", 
+                "Uzbekistan", "UK"),
+  text = list(pdfkyrgyz, pdfCIS2011, pdfFTA1994, pdfGeorgia, pdfArmenia, 
+              pdfMontenegro, pdfMacedonia, pdfEU, pdfIsrael, pdfCanada, 
+              pdfMoldova, pdfAzerbaijan, pdfBelarus, pdfKazakh, pdfTajik, 
+              pdfUzbek, pdfUK)
+)
+```
+```{r}
+library(quanteda)
+library(dplyr)
+
+# Collapse each PDF's vector of pages into a single character string per agreement
+fta_corpus_flat <- fta_corpus %>%
+  mutate(text = sapply(text, paste, collapse = "\n"))
+
+# Now create the corpus safely
+my_corpus <- corpus(fta_corpus_flat, text_field = "text")
+
+# Check it
+summary(my_corpus)
+```
+
+```{r}
+docnames(my_corpus) <- my_corpus$agreement
+ textk = my_corpus
+tokk =  tokens(textk,remove_punct=TRUE,remove_symbols = TRUE, remove_numbers = TRUE)
+toks_stopk = tokens_remove(tokk,c(stopwords::stopwords("english"),"the","of",",","and","‘","contracting","shall","parties","or",".",":","-",";","ofthe",")","party","treaty",",","accordance","paragraph","provisions","agreement","country","sides","article","chapter","Annex","appendix","party","Appendix","shall")) 
+twdfmk <- dfm(toks_stopk) |> dfm_trim(min_docfreq = 3) 
+western = c(0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1)
+
+```
+```{r}
+set.seed(123)
+clusthier = twdfmk |> dist(method = "canberra") |>  hclust()
+plot(clusthier)
+clmod=skmeans(as.matrix(twdfmk),k = 4)
+clred = t(as.data.frame(clmod$prototypes))
+clmod$cluster
+forestngram = randomForest(x=as.matrix(twdfmk),y=factor(western),ntree=1000)
+nbngram = textmodel_nb(twdfmk,western)
+svmngram = textmodel_svmlin(twdfmk,western)
+
+```
+
+
+
+```{r}
+library(randomForest)
+library(quanteda)
+library(quanteda.textmodels)
+# LLM generated LOOCV code # 
+# Total number of documents
+n <- nrow(twdfmk)
+
+# Ensure the target variable is a factor
+y <- factor(western)
+
+# Vectors to store the predicted classes for each model
+pred_rf  <- character(n)
+pred_nb  <- character(n)
+pred_svm <- character(n)
+
+# Start LOOCV loop
+cat("Running LOOCV loop across", n, "documents...\n")
+for (i in 1:n) {
+  # Training indices (all except i) and testing index (just i)
+  train_idx <- -i
+  test_idx <- i
+  
+  # 1. Random Forest
+  # randomForest expects a standard matrix/data.frame; drop=FALSE keeps it 2D
+  rf_model <- randomForest(
+    x = as.matrix(twdfmk[train_idx, ]), 
+    y = y[train_idx], 
+    ntree = 1000
+  )
+  pred_rf[i] <- as.character(predict(rf_model, newdata = as.matrix(twdfmk[test_idx, , drop = FALSE])))
+  
+  # 2. Naive Bayes (quanteda.textmodels)
+  nb_model <- textmodel_nb(twdfmk[train_idx, ], y[train_idx])
+  pred_nb[i] <- as.character(predict(nb_model, newdata = twdfmk[test_idx, ], type = "class"))
+  
+  # 3. Linear SVM (quanteda.textmodels)
+  svm_model <- textmodel_svmlin(twdfmk[train_idx, ], y[train_idx])
+  pred_svm[i] <- as.character(predict(svm_model, newdata = twdfmk[test_idx, ]))
+}
+
+# --- Evaluation (Accuracy) ---
+actual <- as.character(y)
+acc_rf  <- mean(pred_rf == actual)
+acc_nb  <- mean(pred_nb == actual)
+acc_svm <- mean(pred_svm == actual)
+
+cat("\n--- LOOCV Accuracies ---\n")
+cat(sprintf("Random Forest: %.2f%%\n", acc_rf * 100))
+cat(sprintf("Naive Bayes:   %.2f%%\n", acc_nb * 100))
+cat(sprintf("Linear SVM:    %.2f%%\n", acc_svm * 100))
+```
+
+```{r}
+toks_stopk = tokens_remove(tokk,c(stopwords::stopwords("english"),"the","of",",","and","‘","contracting","shall","parties","or",".",":","-",";","ofthe",")","party","treaty",",","accordance","paragraph","provisions","agreement","country","sides","article","chapter","Annex","appendix","party","Appendix","shall")) |> tokens_ngrams(n=2L)
+twdfmk <- dfm(toks_stopk) |> dfm_trim(min_docfreq = 3)
+western = c(0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1)
+
+```
+```{r}
+set.seed(123)
+clusthier = twdfmk |> dist(method = "canberra") |>  hclust()
+plot(clusthier)
+clmod=skmeans(as.matrix(twdfmk),k = 4)
+clred = t(as.data.frame(clmod$prototypes))
+clmod$cluster
+forestngram = randomForest(x=as.matrix(twdfmk),y=factor(western),ntree=1000)
+nbngram = textmodel_nb(twdfmk,western)
+svmngram = textmodel_svmlin(twdfmk,western)
+
+```
+
+
+
+```{r}
+library(randomForest)
+library(quanteda)
+library(quanteda.textmodels)
+# LLM generated LOOCV code # 
+# Total number of documents
+n <- nrow(twdfmk)
+
+# Ensure the target variable is a factor
+y <- factor(western)
+
+# Vectors to store the predicted classes for each model
+pred_rf  <- character(n)
+pred_nb  <- character(n)
+pred_svm <- character(n)
+
+# Start LOOCV loop
+cat("Running LOOCV loop across", n, "documents...\n")
+for (i in 1:n) {
+  # Training indices (all except i) and testing index (just i)
+  train_idx <- -i
+  test_idx <- i
+  
+  # 1. Random Forest
+  # randomForest expects a standard matrix/data.frame; drop=FALSE keeps it 2D
+  rf_model <- randomForest(
+    x = as.matrix(twdfmk[train_idx, ]), 
+    y = y[train_idx], 
+    ntree = 1000
+  )
+  pred_rf[i] <- as.character(predict(rf_model, newdata = as.matrix(twdfmk[test_idx, , drop = FALSE])))
+  
+  # 2. Naive Bayes (quanteda.textmodels)
+  nb_model <- textmodel_nb(twdfmk[train_idx, ], y[train_idx])
+  pred_nb[i] <- as.character(predict(nb_model, newdata = twdfmk[test_idx, ], type = "class"))
+  
+  # 3. Linear SVM (quanteda.textmodels)
+  svm_model <- textmodel_svmlin(twdfmk[train_idx, ], y[train_idx])
+  pred_svm[i] <- as.character(predict(svm_model, newdata = twdfmk[test_idx, ]))
+}
+
+# --- Evaluation (Accuracy) ---
+actual <- as.character(y)
+acc_rf  <- mean(pred_rf == actual)
+acc_nb  <- mean(pred_nb == actual)
+acc_svm <- mean(pred_svm == actual)
+
+cat("\n--- LOOCV Accuracies ---\n")
+cat(sprintf("Random Forest: %.2f%%\n", acc_rf * 100))
+cat(sprintf("Naive Bayes:   %.2f%%\n", acc_nb * 100))
+cat(sprintf("Linear SVM:    %.2f%%\n", acc_svm * 100))
+```
+
+```{r}
+toks_stopk = tokens_remove(tokk,c(stopwords::stopwords("english"),"the","of",",","and","‘","contracting","shall","parties","or",".",":","-",";","ofthe",")","party","treaty",",","accordance","paragraph","provisions","agreement","country","sides","article","chapter","Annex","appendix","party","Appendix","shall")) |> tokens_ngrams(n=3L)
+twdfmk <- dfm(toks_stopk) |> dfm_trim(min_docfreq = 3) 
+western = c(0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1)
+
+```
+```{r}
+set.seed(123)
+forestngram = randomForest(x=as.matrix(twdfmk),y=factor(western),ntree=1000)
+nbngram = textmodel_nb(twdfmk,western)
+svmngram = textmodel_svmlin(twdfmk,western)
+
+
+```
+
+
+
+```{r}
+library(randomForest)
+library(quanteda)
+library(quanteda.textmodels)
+# LLM generated LOOCV code # 
+# Total number of documents
+n <- nrow(twdfmk)
+
+# Ensure the target variable is a factor
+y <- factor(western)
+
+# Vectors to store the predicted classes for each model
+pred_rf  <- character(n)
+pred_nb  <- character(n)
+pred_svm <- character(n)
+
+# Start LOOCV loop
+cat("Running LOOCV loop across", n, "documents...\n")
+for (i in 1:n) {
+  # Training indices (all except i) and testing index (just i)
+  train_idx <- -i
+  test_idx <- i
+  
+  # 1. Random Forest
+  # randomForest expects a standard matrix/data.frame; drop=FALSE keeps it 2D
+  rf_model <- randomForest(
+    x = as.matrix(twdfmk[train_idx, ]), 
+    y = y[train_idx], 
+    ntree = 1000
+  )
+  pred_rf[i] <- as.character(predict(rf_model, newdata = as.matrix(twdfmk[test_idx, , drop = FALSE])))
+  
+  # 2. Naive Bayes (quanteda.textmodels)
+  nb_model <- textmodel_nb(twdfmk[train_idx, ], y[train_idx])
+  pred_nb[i] <- as.character(predict(nb_model, newdata = twdfmk[test_idx, ], type = "class"))
+  
+  # 3. Linear SVM (quanteda.textmodels)
+  svm_model <- textmodel_svmlin(twdfmk[train_idx, ], y[train_idx])
+  pred_svm[i] <- as.character(predict(svm_model, newdata = twdfmk[test_idx, ]))
+}
+
+# --- Evaluation (Accuracy) ---
+actual <- as.character(y)
+acc_rf  <- mean(pred_rf == actual)
+acc_nb  <- mean(pred_nb == actual)
+acc_svm <- mean(pred_svm == actual)
+
+cat("\n--- LOOCV Accuracies ---\n")
+cat(sprintf("Random Forest: %.2f%%\n", acc_rf * 100))
+cat(sprintf("Naive Bayes:   %.2f%%\n", acc_nb * 100))
+cat(sprintf("Linear SVM:    %.2f%%\n", acc_svm * 100))
+```
+```{r}
+set.seed(123)
+clusthier = twdfmk |> dist(method = "canberra") |>  hclust()
+plot(clusthier)
+clmod=skmeans(as.matrix(twdfmk),k = 4)
+clred = as.data.frame(t(clmod$prototypes))
+clmod$cluster
+clred |>
+  arrange(desc(`4`)) |> head(15)
+clred |>
+  arrange(desc(`1`)) |> head(15)
+```
+```{r}
+varImpPlot(forestngram)
+nbresults = as.data.frame(t(nbngram$param))
+nbresults$relative_loglikelihood1 = log(nbresults$`1`/nbresults$`0`)
+most_indicative_of_west = filter(nbresults,relative_loglikelihood1>=2)
+least_indicative_of_west = filter(nbresults,relative_loglikelihood1 <= -2)
+ most_indicative_of_west |>
+  rownames_to_column(var = "feature") |>
+   arrange(desc(relative_loglikelihood1)) |> select(feature,relative_loglikelihood1) |> head(40)
+ least_indicative_of_west |>
+  rownames_to_column(var = "feature") |> 
+   arrange(relative_loglikelihood1) |> select(feature,relative_loglikelihood1) |> head(40)
+```
+```{r}
+library(seededlda)
+topicmod = textmodel_lda(twdfmk,k=10)
+topics(topicmod)
+seededlda::terms(topicmod)
+```
